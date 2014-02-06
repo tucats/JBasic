@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--JBasic message definition file, created Mon Feb 07 18:42:34 EST 2011 -->
+<MessageDefinitions>
+  <Message name="_PERM__NOPERMS">
+    <EN>No user permissions defined</EN>
+  </Message>
+  <Message name="_PERM__PERMS">
+    <EN>User permissions:</EN>
+  </Message>
+  <Message name="_PERM_ADMIN_SERVER">
+    <EN>Start, stop and configure the multi-user server</EN>
+  </Message>
+  <Message name="_PERM_ADMIN_USER">
+    <EN>Add, delete, or modify server user settings</EN>
+  </Message>
+  <Message name="_PERM_ASM">
+    <EN>Include bytecode instructions in user program statements</EN>
+  </Message>
+  <Message name="_PERM_DIR_IO">
+    <EN>Read the contents of file system directories</EN>
+  </Message>
+  <Message name="_PERM_FILE_IO">
+    <EN>Perform file I/O operations</EN>
+  </Message>
+  <Message name="_PERM_FILE_READ">
+    <EN>Open files for reading</EN>
+  </Message>
+  <Message name="_PERM_FILE_WRITE">
+    <EN>Open files for writing</EN>
+  </Message>
+  <Message name="_PERM_FSNAMES">
+    <EN>Access local file system namespace</EN>
+  </Message>
+  <Message name="_PERM_JAVA">
+    <EN>Access the Java language interfaces</EN>
+  </Message>
+  <Message name="_PERM_LOGGING">
+    <EN>Modify the logging level for a session</EN>
+  </Message>
+  <Message name="_PERM_PASSWORD">
+    <EN>Change user password</EN>
+  </Message>
+  <Message name="_PERM_SHELL">
+    <EN>Access a native operating system shell process</EN>
+  </Message>
+  <Message name="_PERM_THREADS">
+    <EN>Start, stop, or access information about threads</EN>
+  </Message>
+</MessageDefinitions>

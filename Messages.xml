@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--JBasic message definition file, created Fri Jun 24 17:18:20 EDT 2011 -->
+<MessageDefinitions>
+  <Message name="*BRANCH">
+    <EN>Branch execution</EN>
+  </Message>
+  <Message name="*NOCOMPILE">
+    <EN>No compilation support for [] statement</EN>
+    <FR>Ne peut pas compiler le rapport</FR>
+  </Message>
+  <Message name="*QUIT">
+    <EN>Quit JBasic</EN>
+  </Message>
+  <Message name="*RETURN">
+    <EN>Return from program or function</EN>
+  </Message>
+  <Message name="*STMTADDED">
+    <EN>Statement added to active program</EN>
+  </Message>
+  <Message name="*SUCCESS">
+    <EN>No error</EN>
+    <ES>Resultados exitosos</ES>
+    <FR>Aucune erreur</FR>
+  </Message>
+  <Message name="*SYSTEM">
+    <EN>SYSTEM process return code []</EN>
+    <ES>Mensaje devuelto por el proceso SYSTEM, []</ES>
+  </Message>
+  <Message name="*UNSAVED">
+    <EN>QUIT canceled</EN>
+  </Message>
+  <Message name="ARGERR">
+    <EN>Argument list error</EN>
+    <ES>Error en par\u00e1metros de la funci\u00f3n</ES>
+  </Message>
+  <Message name="ARGNOTGIVEN">
+    <EN>Argument not given for []</EN>
+    <ES>Par\u00e1metro no dado para []</ES>
+  </Message>
+  <Message name="ARGTYPE">
+    <EN>Argument of wrong type</EN>
+    <ES>El par\u00e1metro este del tipo incorrecto</ES>
+  </Message>
+  <Message name="ARRAY">
+    <EN>Invalid array syntax</EN>
+  </Message>
+  <Message name="ARRAYBOUNDS">
+    <EN>Array index [] out of bounds</EN>
+  </Message>
+  <Message name="ASMEXPOPCODE">
+    <EN>Expected OPCODE not found</EN>
+  </Message>
+  <Message name="ASMINVOPCODE">
+    <EN>Invalid or unknown OPCODE '[]'</EN>
+  </Message>
+  <Message name="ASSIGNMENT">
+    <EN>Missing '=' operator</EN>
+  </Message>
+  <Message name="ATLINE">
+    <EN>At line []</EN>
+  </Message>
+  <Message name="ATROW">
+    <EN>At array row []</EN>
+  </Message>
+  <Message name="BADSIZE">
+    <EN>Bad size value []</EN>
+  </Message>
+  <Message name="BADTYPE">
+    <EN>Bad data type name []</EN>
+  </Message>
+  <Message name="BADURL">
+    <EN>Bad URL string, []</EN>
+  </Message>
+  <Message name="BRACKETS">
+    <EN>Missing or mismatched brackets</EN>
+  </Message>
+  <Message name="CALLDEPTH">
+    <EN>Call depth limit exceeded</EN>
+  </Message>
+  <Message name="COMMA">
+    <EN>Missing comma</EN>
+  </Message>
+  <Message name="DATETIME">
+    <EN>Invalid date/time value []</EN>
+  </Message>
+  <Message name="DIALECT">
+    <EN>Language dialect does not allow []</EN>
+  </Message>
+  <Message name="DUPCLAUSE">
+    <EN>Syntax error, more than one [] clause found</EN>
+  </Message>
+  <Message name="DUPFIELD">
+    <EN>Duplicate field name [] specified</EN>
+  </Message>
+  <Message name="DUPLABEL">
+    <EN>Duplicate label []</EN>
+  </Message>
+  <Message name="DUPVAR">
+    <EN>Duplicate variable definition for []</EN>
+  </Message>
+  <Message name="ELSE">
+    <EN>Invalid or unexpected ELSE</EN>
+  </Message>
+  <Message name="EOD">
+    <EN>End of DATA</EN>
+  </Message>
+  <Message name="EOF">
+    <EN>End of file</EN>
+  </Message>
+  <Message name="ERROR">
+    <EN>Error</EN>
+    <ES>Problema</ES>
+  </Message>
+  <Message name="EXEC">
+    <EN>Unexpected shell command result []</EN>
+  </Message>
+  <Message name="EXPARRAY">
+    <EN>Expected array name not found</EN>
+  </Message>
+  <Message name="EXPAS">
+    <EN>Expected keyword AS not found</EN>
+  </Message>
+  <Message name="EXPCALL">
+    <EN>Expected destination of CALL not found</EN>
+  </Message>
+  <Message name="EXPCLAUSE">
+    <EN>Expected [] clause not found</EN>
+  </Message>
+  <Message name="EXPCONST">
+    <EN>Expected constant value not found</EN>
+  </Message>
+  <Message name="EXPFID">
+    <EN>Expected file ID not found</EN>
+  </Message>
+  <Message name="EXPFNAME">
+    <EN>Expected file name not found</EN>
+  </Message>
+  <Message name="EXPINDEX">
+    <EN>Expected array index not found</EN>
+  </Message>
+  <Message name="EXPLABEL">
+    <EN>Expected label not found</EN>
+  </Message>
+  <Message name="EXPLANG">
+    <EN>Expected language code not found</EN>
+  </Message>
+  <Message name="EXPMEMBER">
+    <EN>Expected record member [] not found</EN>
+  </Message>
+  <Message name="EXPMESSAGE">
+    <EN>Expected MESSAGE code not found</EN>
+  </Message>
+  <Message name="EXPNAME">
+    <EN>Expected name not found</EN>
+  </Message>
+  <Message name="EXPNEXT">
+    <EN>Expected FOR index variable not given</EN>
+  </Message>
+  <Message name="EXPPGM">
+    <EN>Expected program name not found</EN>
+  </Message>
+  <Message name="EXPREC">
+    <EN>Expected RECORD value not found</EN>
+  </Message>
+  <Message name="EXPRESSION">
+    <EN>Missing or invalid expression</EN>
+    <ES>Expresi\u00f3n que falta o inv\u00e1lida, []</ES>
+  </Message>
+  <Message name="EXPRETVAL">
+    <EN>Calling program expects RETURN value but called program does not return one</EN>
+  </Message>
+  <Message name="EXPSIZE">
+    <EN>Expected SIZE value not found</EN>
+  </Message>
+  <Message name="EXPSYNTAX">
+    <EN>Invalid expression syntax, []</EN>
+  </Message>
+  <Message name="EXPTYPE">
+    <EN>Expected TYPE name, found []</EN>
+  </Message>
+  <Message name="EXPVALUE">
+    <EN>Expected value not found</EN>
+  </Message>
+  <Message name="EXPVARS">
+    <EN>Expected variable list not given</EN>
+  </Message>
+  <Message name="EXTRA">
+    <EN>Extra text after statement end: '[]'</EN>
+    <ES>Texto adicional despu\u00c8s del extremo de la declaraci\u00dbn: []</ES>
+  </Message>
+  <Message name="FAULT">
+    <EN>Unexpected runtime exception, []</EN>
+  </Message>
+  <Message name="FILE">
+    <EN>Error on file operation, []</EN>
+  </Message>
+  <Message name="FILECOL">
+    <EN>Invalid use of COLUMNS()</EN>
+  </Message>
+  <Message name="FILECOMMA">
+    <EN>Missing comma after FILE clause</EN>
+  </Message>
+  <Message name="FILECONSOLE">
+    <EN>Invalid operation on console device</EN>
+  </Message>
+  <Message name="FILEINUSE">
+    <EN>File identifier [] already in use</EN>
+  </Message>
+  <Message name="FILEMODE">
+    <EN>invalid file mode for open</EN>
+  </Message>
+  <Message name="FILENF">
+    <EN>File [] not found</EN>
+    <ES>Archivo [] no encontrado</ES>
+  </Message>
+  <Message name="FILENOTBIN">
+    <EN>File [] not open for BINARY I/O</EN>
+  </Message>
+  <Message name="FILESYNTAX">
+    <EN>FILE clause syntax error []</EN>
+    <ES>Error del sintaxis en la declaraci\u00f3n del FILE: []</ES>
+  </Message>
+  <Message name="FILESYS">
+    <EN>System files cannot be closed by user programs</EN>
+  </Message>
+  <Message name="FLTSIZE">
+    <EN>Invalid FLOAT size []</EN>
+  </Message>
+  <Message name="FNDEL">
+    <EN>File [] not found or cannot be deleted</EN>
+    <ES>El archivo [] no se encuentra ni puede ser suprimido</ES>
+  </Message>
+  <Message name="FNOPEN">
+    <EN>File [] not open for input or output</EN>
+    <ES>El archivo [] no est\u00b7 disponible para la entrada o la salida</ES>
+  </Message>
+  <Message name="FNOPENINPUT">
+    <EN>File [] not open for input</EN>
+  </Message>
+  <Message name="FNOPENOUTPUT">
+    <EN>File [] not open for output</EN>
+  </Message>
+  <Message name="FORINCR">
+    <EN>FOR loop increment cannot be zero</EN>
+  </Message>
+  <Message name="FORINDEX">
+    <EN>Mismatched FOR-NEXT index variable []</EN>
+  </Message>
+  <Message name="FORMATERR">
+    <EN>Format string error []</EN>
+  </Message>
+  <Message name="FUNCFAULT">
+    <EN>Unexpected function runtime exception, []</EN>
+  </Message>
+  <Message name="GOSUB">
+    <EN>RETURN without GOSUB</EN>
+  </Message>
+  <Message name="IDXEXP">
+    <EN>Missing or invalid array index expression</EN>
+  </Message>
+  <Message name="IDXSYNTAX">
+    <EN>Invalid array reference syntax</EN>
+  </Message>
+  <Message name="IF">
+    <EN>Missing or invalid conditional expression</EN>
+  </Message>
+  <Message name="IFERR">
+    <EN>Mismatched IF-ELSE-END IF at line []</EN>
+  </Message>
+  <Message name="IMPCVT">
+    <EN>Invalid implicit conversion to [] type</EN>
+  </Message>
+  <Message name="INFILE">
+    <EN>file [] not opened for input</EN>
+  </Message>
+  <Message name="INPUTERR">
+    <EN>Error in INPUT statement, []</EN>
+  </Message>
+  <Message name="INSFARGS">
+    <EN>Insufficient arguments given</EN>
+  </Message>
+  <Message name="INSTATEMENT">
+    <EN>In statement: </EN>
+    <ES>En la declaraci\u00f3n: </ES>
+  </Message>
+  <Message name="INTERRUPT">
+    <EN>Interrupted by user</EN>
+  </Message>
+  <Message name="INTSIZE">
+    <EN>Invalid INTEGER size []</EN>
+  </Message>
+  <Message name="INVALIDLET">
+    <EN>Invalid LET</EN>
+  </Message>
+  <Message name="INVALL">
+    <EN>Invalid ALL or HIDDEN keyword</EN>
+  </Message>
+  <Message name="INVCATALOG">
+    <EN>Invalid or unknown CATALOG []</EN>
+  </Message>
+  <Message name="INVCLASS">
+    <EN>Invalid or unknown class []</EN>
+  </Message>
+  <Message name="INVCOMPILE">
+    <EN>Invalid COMPILE command []</EN>
+  </Message>
+  <Message name="INVCOUNT">
+    <EN>Invalid count []</EN>
+  </Message>
+  <Message name="INVCVT">
+    <EN>Invalid attempt to convert to [] type</EN>
+  </Message>
+  <Message name="INVDATTYP">
+    <EN>Invalid data type []</EN>
+  </Message>
+  <Message name="INVDBGOP">
+    <EN>Invalid operation when running with debugger</EN>
+  </Message>
+  <Message name="INVDIM">
+    <EN>Invalid DIM AS syntax or invalid type name</EN>
+  </Message>
+  <Message name="INVEXEC">
+    <EN>Invalid EXECUTE expression</EN>
+  </Message>
+  <Message name="INVFID">
+    <EN>Invalid FILE ID</EN>
+  </Message>
+  <Message name="INVFMODE">
+    <EN>Invalid file mode []</EN>
+  </Message>
+  <Message name="INVFMT">
+    <EN>Invalid FORMAT specification []</EN>
+  </Message>
+  <Message name="INVFOR">
+    <EN>Invalid FOR statement</EN>
+  </Message>
+  <Message name="INVLABEL">
+    <EN>Invalid use of label [] in a command</EN>
+  </Message>
+  <Message name="INVLINE">
+    <EN>Invalid line number []</EN>
+  </Message>
+  <Message name="INVLOCK">
+    <EN>Lock [] is nonexistent or not owned by this thread</EN>
+  </Message>
+  <Message name="INVNAME">
+    <EN>Invalid name []</EN>
+  </Message>
+  <Message name="INVOBJECT">
+    <EN>[] does not exist or is an invalid object</EN>
+  </Message>
+  <Message name="INVOBJFLD">
+    <EN>Invalid or nonexistent Java object field []</EN>
+  </Message>
+  <Message name="INVOBJMETH">
+    <EN>Invalid or unknown object method []</EN>
+  </Message>
+  <Message name="INVOBJOP">
+    <EN>Invalid attempt to [] a Java object</EN>
+  </Message>
+  <Message name="INVONSTACK">
+    <EN>ON statement not valid outside running program.</EN>
+  </Message>
+  <Message name="INVOPARG">
+    <EN>Invalid opcode argument []</EN>
+  </Message>
+  <Message name="INVPATH">
+    <EN>Invalid file system path []</EN>
+  </Message>
+  <Message name="INVPATTERN">
+    <EN>Invalid MATCHES pattern string: []</EN>
+  </Message>
+  <Message name="INVPERM">
+    <EN>Invalid PERMISSION name []</EN>
+  </Message>
+  <Message name="INVPGM">
+    <EN>Invalid PROGRAM statement</EN>
+  </Message>
+  <Message name="INVPGMLIN">
+    <EN>Invalid program statement line</EN>
+  </Message>
+  <Message name="INVPGMOBJ">
+    <EN>Invalid PROGRAM object, []</EN>
+  </Message>
+  <Message name="INVPRINT">
+    <EN>Invalid PRINT syntax</EN>
+  </Message>
+  <Message name="INVPRINTUSING">
+    <EN>Invalid PRINT USING or missing comma after USING.</EN>
+  </Message>
+  <Message name="INVRECARRAY">
+    <EN>Invalid array of records</EN>
+  </Message>
+  <Message name="INVRECDEF">
+    <EN>Invalid file record definition, []</EN>
+  </Message>
+  <Message name="INVRECORD">
+    <EN>Invalid RECORD constant</EN>
+  </Message>
+  <Message name="INVRECSYN">
+    <EN>Invalid or missing record syntax</EN>
+  </Message>
+  <Message name="INVRECUSE">
+    <EN>Invalid use of RECORD value</EN>
+  </Message>
+  <Message name="INVRENINC">
+    <EN>Invalid RENUMBER increment []</EN>
+  </Message>
+  <Message name="INVRENSTART">
+    <EN>Invalid RENUMBER starting line number []</EN>
+  </Message>
+  <Message name="INVRET">
+    <EN>Invalid RETURNS clause</EN>
+  </Message>
+  <Message name="INVSCOPE">
+    <EN>Invalid storage class for []</EN>
+  </Message>
+  <Message name="INVSET">
+    <EN>Invalid SET statement syntax or option</EN>
+    <ES>Sintaxis inv\u00b7lido de la declaraci\u00dbn del SET</ES>
+  </Message>
+  <Message name="INVSHOW">
+    <EN>Invalid SHOW option []</EN>
+  </Message>
+  <Message name="INVSORT">
+    <EN>Invalid SORT BY syntax</EN>
+  </Message>
+  <Message name="INVTABLE">
+    <EN>Invalid TABLE []</EN>
+  </Message>
+  <Message name="INVTYPE">
+    <EN>Array contains invalid type</EN>
+  </Message>
+  <Message name="INVUNTIL">
+    <EN>Invalid or missing UNTIL expression</EN>
+  </Message>
+  <Message name="INVUSING">
+    <EN>Invalid USING() syntax</EN>
+  </Message>
+  <Message name="INVVARLEN">
+    <EN>Invalid variable length specification in [] statement</EN>
+  </Message>
+  <Message name="IOERROR">
+    <EN>Unexpected FILE I/O error, []</EN>
+  </Message>
+  <Message name="JDBC">
+    <EN>JDBC error, []</EN>
+  </Message>
+  <Message name="KEYWORD">
+    <EN>Invalid or unexpected keyword []</EN>
+  </Message>
+  <Message name="LANGUAGE">
+    <EN>Unsupported language code []</EN>
+  </Message>
+  <Message name="LINENUM">
+    <EN>Line number [] not found</EN>
+  </Message>
+  <Message name="LINKERR">
+    <EN>Cannot link program. []</EN>
+  </Message>
+  <Message name="LVALUE">
+    <EN>Invalid assignment target '[]'</EN>
+  </Message>
+  <Message name="MATH">
+    <EN>Arithmetic error, []</EN>
+  </Message>
+  <Message name="METHSCOPE">
+    <EN>Invocation of method [] is illegal in STATIC or LOCAL_SCOPE programs</EN>
+  </Message>
+  <Message name="MISMATDO">
+    <EN>Mismatched DO..LOOP statements</EN>
+  </Message>
+  <Message name="MISMATFOR">
+    <EN>Mismatched FOR..NEXT statements</EN>
+  </Message>
+  <Message name="NOACTIVEPGM">
+    <EN>This statement can only be used in a program, not as a command</EN>
+  </Message>
+  <Message name="NOBYTECODE">
+    <EN>No ByteCode generated</EN>
+  </Message>
+  <Message name="NOCOMPOUND">
+    <EN>Compound statement not allowed after [] command</EN>
+  </Message>
+  <Message name="NODBG">
+    <EN>No debugger active</EN>
+  </Message>
+  <Message name="NODELLINE">
+    <EN>No such line(s) to delete</EN>
+  </Message>
+  <Message name="NODELVAR">
+    <EN>Unable to delete read-only or system variable []</EN>
+  </Message>
+  <Message name="NODO">
+    <EN>Mismatched DO..[]</EN>
+  </Message>
+  <Message name="NOEXE">
+    <EN>No command given</EN>
+  </Message>
+  <Message name="NOFOR">
+    <EN>NEXT without FOR</EN>
+  </Message>
+  <Message name="NOFUNCS">
+    <EN>[] not permitted in this expression context</EN>
+  </Message>
+  <Message name="NOFUNRUN">
+    <EN>Function [] cannot be called at runtime (compile-only function)</EN>
+  </Message>
+  <Message name="NOLINELBLS">
+    <EN>Line numbers (such as []) cannot be used as GOTO destinations in JBasic. Use text labels.</EN>
+  </Message>
+  <Message name="NOLOOP">
+    <EN>No active DO..LOOP or FOR..NEXT loop</EN>
+  </Message>
+  <Message name="NOMEMBER">
+    <EN>Member [] does not exist</EN>
+  </Message>
+  <Message name="NOMSG">
+    <EN>Invalid or missing MESSAGE code</EN>
+  </Message>
+  <Message name="NOPGM">
+    <EN>There is no current program</EN>
+  </Message>
+  <Message name="NOPWD">
+    <EN>Cannot use SET PASSWORD except as remote user</EN>
+  </Message>
+  <Message name="NORENUM">
+    <EN>Cannot RENUMBER because of invalid line number references</EN>
+  </Message>
+  <Message name="NOSUCHFID">
+    <EN>File [] invalid or not open</EN>
+  </Message>
+  <Message name="NOSUCHLABEL">
+    <EN>Label [] not found</EN>
+  </Message>
+  <Message name="NOSUCHMEMBER">
+    <EN>Record member [] not found</EN>
+  </Message>
+  <Message name="NOSUCHMETHOD">
+    <EN>Method [] cannot be found in CLASS hierarchy</EN>
+  </Message>
+  <Message name="NOTABLE">
+    <EN>Symbol table [] not found</EN>
+  </Message>
+  <Message name="NOTARRAY">
+    <EN>Variable '[]' is not an array variable</EN>
+  </Message>
+  <Message name="NOTBINARY">
+    <EN>File [] is not opened for BINARY file access</EN>
+  </Message>
+  <Message name="NOTE">
+    <EN>Note</EN>
+    <ES>Nota</ES>
+  </Message>
+  <Message name="NOTNEW">
+    <EN>The name [] is already in use</EN>
+  </Message>
+  <Message name="NOTRECORD">
+    <EN>Variable [] is not a record</EN>
+  </Message>
+  <Message name="NOUSER">
+    <EN>No user []</EN>
+  </Message>
+  <Message name="OBJEXCEPT">
+    <EN>Unexpected object exception []</EN>
+  </Message>
+  <Message name="PAREN">
+    <EN>Mismatched or missing parenthesis</EN>
+  </Message>
+  <Message name="PGMNOTFIRST">
+    <EN>PROGRAM statement not first line of code in file '[]'</EN>
+  </Message>
+  <Message name="PGMORARRAY">
+    <EN>LIST requires a PROGRAM or ARRAY name</EN>
+  </Message>
+  <Message name="PGMREADONLY">
+    <EN>Program [] cannot be modified, it is READONLY</EN>
+  </Message>
+  <Message name="PROGRAM">
+    <EN>Program [] not found</EN>
+    <ES>El programa [] no se encuentra</ES>
+  </Message>
+  <Message name="PROTECTED">
+    <EN>Program [] is a protected program</EN>
+  </Message>
+  <Message name="READONLY">
+    <EN>Variable [] is read-only</EN>
+  </Message>
+  <Message name="REFSTR">
+    <EN>_REFSTR 1 without _REFSTR 0</EN>
+  </Message>
+  <Message name="REGARRSIZ">
+    <EN>Invalid register array size []</EN>
+  </Message>
+  <Message name="REGNUM">
+    <EN>Invalid register array index []</EN>
+  </Message>
+  <Message name="RESERVED">
+    <EN>Invalid use of reserved word [] where identifier required</EN>
+  </Message>
+  <Message name="RUNFROM">
+    <EN>Invalid or missing starting line number or label</EN>
+  </Message>
+  <Message name="RUNNING">
+    <EN>Server already running, SERVER SHOW STATUS for more information.</EN>
+  </Message>
+  <Message name="SANDBOX">
+    <EN>You do not have permission for the requested operation or function ([])</EN>
+  </Message>
+  <Message name="SERVER">
+    <EN>Server administration error, []</EN>
+  </Message>
+  <Message name="SERVERINITACCOUNTS">
+    <EN>Creating initial ADMIN and GUEST accounts</EN>
+  </Message>
+  <Message name="SERVERENTERPW">
+    <EN>Enter a new password for [] account or press return for generated password:</EN>
+  </Message>
+  <Message name="SERVERPATHERR">
+    <EN>Unable to create file system path []</EN>
+  </Message>
+   <Message name="SERVERVALIDHOME">
+    <EN>Validating user home directories</EN>
+  </Message>
+  <Message name="SERVERVALIDLOGICALS">
+    <EN>Validating logical name paths</EN>
+  </Message>
+  <Message name="SERVERVALIDPATH">
+    <EN>Validating file system path []</EN>
+  </Message>
+  <Message name="SERVERCREATEPATH">
+    <EN>Creating file system path []</EN>
+  </Message>
+  <Message name="SERVERGENPW">
+    <EN>Account generated password is []</EN>
+  </Message>
+  <Message name="SERVERPWPROMPT">
+    <EN>Enter a new password for ADMIN account or press return for generated password:</EN>
+  </Message>
+  <Message name="SERVERNOAUTHFILE">
+    <EN>No authorization database file found</EN>
+  </Message>
+ <Message name="SERVERADDACCOUNT">
+    <EN>Added [] account</EN>
+  </Message>
+ <Message name="SERVERPWRESET">
+    <EN>Reset password for [] account</EN>
+  </Message>
+ <Message name="SOCKET">
+    <EN>Socket I/O error; []</EN>
+  </Message>
+  <Message name="SOCKETMODE">
+    <EN>Invalid socket specification []</EN>
+  </Message>
+  <Message name="SQL">
+    <EN>Error in SQL statement</EN>
+  </Message>
+  <Message name="SQLCOL">
+    <EN>Invalid or missing column []</EN>
+  </Message>
+  <Message name="SQLDUPFIELD">
+    <EN>Field name [] already in use</EN>
+  </Message>
+  <Message name="SQLDUPNAME">
+    <EN>Name [] already in use</EN>
+  </Message>
+  <Message name="SQLDUPTABLE">
+    <EN>Table name [] already in use</EN>
+  </Message>
+  <Message name="SQLPREP">
+    <EN>Attempt to execute or fetch before successfull prepare</EN>
+  </Message>
+  <Message name="SQLTABLE">
+    <EN>Invalid or missing table []</EN>
+  </Message>
+  <Message name="SQLUNSUP">
+    <EN>Unsupported feature</EN>
+  </Message>
+  <Message name="SQLWORD">
+    <EN>Invalid or missing keyword []</EN>
+  </Message>
+  <Message name="STEP">
+    <EN>STEP command only valid in DEBUG mode</EN>
+  </Message>
+  <Message name="SYNEXPTOK">
+    <EN>Syntax error, expected [] not found</EN>
+  </Message>
+  <Message name="SYNINVTOK">
+    <EN>Syntax error, invalid or unexpected [] found</EN>
+  </Message>
+  <Message name="SYNTAX">
+    <EN>Syntax error, []</EN>
+  </Message>
+  <Message name="THEN">
+    <EN>Invalid or unexpected THEN</EN>
+  </Message>
+  <Message name="THREAD">
+    <EN>Invalid THREAD operation</EN>
+  </Message>
+  <Message name="THREADNR">
+    <EN>Thread [] not running.</EN>
+  </Message>
+  <Message name="THREADRET">
+    <EN>CALL cannot return a value from a thread</EN>
+  </Message>
+  <Message name="TOOMANYARGS">
+    <EN>Too many arguments given</EN>
+  </Message>
+  <Message name="TYPEMISMATCH">
+    <EN>Data or array element type mismatch</EN>
+  </Message>
+  <Message name="UNCOMPILED">
+    <EN>Uncompiled statement []</EN>
+  </Message>
+  <Message name="UNDERFLOW">
+    <EN>Internal arithmetic stack underflow</EN>
+  </Message>
+  <Message name="UNEXPTOK">
+    <EN>Unexpected token [] found</EN>
+  </Message>
+  <Message name="UNIMPBYTECODE">
+    <EN>Internal error; unimplemented byte code []</EN>
+  </Message>
+  <Message name="UNKBPT">
+    <EN>Unknown or invalid breakpoint []</EN>
+  </Message>
+  <Message name="UNKFUNC">
+    <EN>Unknown function []()</EN>
+  </Message>
+  <Message name="UNKLN">
+    <EN>Unknown logical name []</EN>
+  </Message>
+  <Message name="UNKTHREAD">
+    <EN>Unknown thread name []</EN>
+  </Message>
+  <Message name="UNKVAR">
+    <EN>Unknown or invalid name '[]'</EN>
+  </Message>
+  <Message name="VERB">
+    <EN>Unrecognized verb []</EN>
+    <ES>Comando desconocido, []</ES>
+    <FR>Commande non reconnue, []</FR>
+  </Message>
+  <Message name="WRONGMODE">
+    <EN>File not opened for [] mode</EN>
+  </Message>
+  <Message name="WRONGTYPE">
+    <EN>Wrong data type; expected []</EN>
+  </Message>
+  <Message name="XML">
+    <EN>Invalid XML syntax, []</EN>
+  </Message>
+  <Message name="_GETHELP">
+    <EN>Type HELP for more information on how to use JBasic</EN>
+    <ES>Mecanograf\u00cce la HELP para m\u00b7s informaci\u00dbn sobre c\u00f3mo utilizar JBasic</ES>
+  </Message>
+  <Message name="_LOADEDWS">
+    <EN>Loaded user workspace </EN>
+  </Message>
+  <Message name="_LOGIN">
+    <EN>
+Please log in to JBasic
+</EN>
+  </Message>
+  <Message name="_NOMAIN">
+    <EN>No $MAIN program found.</EN>
+  </Message>
+  <Message name="_SAVEPROMPT">
+    <EN>There are unsaved programs.  You must use the SAVE or the
+SAVE WORKSPACE command to permanently store them to disk.
+
+Are you sure you want to QUIT [y/n] ?</EN>
+  </Message>
+  <Message name="_STOPMSG">
+    <EN>STOP statement executed; use RESUME to continue program execution.</EN>
+  </Message>
+  <Message name="_UNKOPT">
+    <EN>Ignoring unknown command line option: </EN>
+  </Message>
+  <Message name="_UNUSEDBUFF">
+    <EN>Warning: unused input buffer text discarded</EN>
+  </Message>
+</MessageDefinitions>

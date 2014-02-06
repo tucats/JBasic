@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Pattern Matching Optimizer Dictionary -->
+<!-- Saved Thu Oct 04 14:57:03 EDT 2012 -->
+<Optimizations>
+  <Opt name="integer_division">
+    <Pattern>_INTEGER   I(*)          @SETINT2                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_DIV                                              </Pattern>
+    <Replace>_INTEGER                 @DIVI12 @RCLINT2         </Replace>
+  </Opt>
+  <Opt name="double_division">
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_DOUBLE    D(*)          @SETDBL1                 </Pattern>
+    <Pattern>_DIV                                              </Pattern>
+    <Replace>_DOUBLE                  @DIVD12 @RCLDBL2         </Replace>
+  </Opt>
+  <Opt name="integer_sub">
+    <Pattern>_INTEGER   I(*)          @SETINT2                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_SUB                                              </Pattern>
+    <Replace>_INTEGER                 @SUB12 @RCLINT2          </Replace>
+  </Opt>
+  <Opt name="double_sub">
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_DOUBLE    D(*)          @SETDBL1                 </Pattern>
+    <Pattern>_SUB                                              </Pattern>
+    <Replace>_DOUBLE                  @SUB12 @RCLDBL2          </Replace>
+  </Opt>
+  <Opt name="double_integer_sub">
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_SUB                                              </Pattern>
+    <Replace>_DOUBLE                  @INTDBL1 @SUB12 @RCLDBL2 </Replace>
+  </Opt>
+  <Opt name="integer_double_sub">
+    <Pattern>_INTEGER   I(*)          @SETINT2                 </Pattern>
+    <Pattern>_DOUBLE    D(*)          @SETDBL1                 </Pattern>
+    <Pattern>_SUB                                              </Pattern>
+    <Replace>_DOUBLE                  @INTDBL2 @SUB12 @RCLDBL2 </Replace>
+  </Opt>
+  <Opt name="integer_add">
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT2                 </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Replace>_INTEGER                 @ADD12 @RCLINT2          </Replace>
+  </Opt>
+  <Opt name="double_add">
+    <Pattern>_DOUBLE    D(*)          @SETDBL1                 </Pattern>
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Replace>_DOUBLE                  @ADD12 @RCLDBL2          </Replace>
+  </Opt>
+  <Opt name="integer_double_add">
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Replace>_DOUBLE                  @INTDBL1 @ADD12 @RCLDBL2 </Replace>
+  </Opt>
+  <Opt name="double_integer_add">
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Replace>_DOUBLE                  @INTDBL1 @ADD12 @RCLDBL2 </Replace>
+  </Opt>
+  <Opt name="integer_mult">
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT2                 </Pattern>
+    <Pattern>_MULT                                             </Pattern>
+    <Replace>_INTEGER                 @MULT12 @RCLINT2         </Replace>
+  </Opt>
+  <Opt name="integer_double_mult">
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_MULT                                             </Pattern>
+    <Replace>_DOUBLE                  @INTDBL1 @MULT12 @RCLDBL2</Replace>
+  </Opt>
+  <Opt name="double_integer_mult">
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_MULT                                             </Pattern>
+    <Replace>_DOUBLE                  @INTDBL1 @MULT12 @RCLDBL2</Replace>
+  </Opt>
+  <Opt name="double_mult">
+    <Pattern>_DOUBLE    D(*)          @SETDBL1                 </Pattern>
+    <Pattern>_DOUBLE    D(*)          @SETDBL2                 </Pattern>
+    <Pattern>_MULT                                             </Pattern>
+    <Replace>_DOUBLE                  @MULT12 @RCLDBL2         </Replace>
+  </Opt>
+  <Opt name="loadref_dupref">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_LOADREF   S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_INDEX                                            </Pattern>
+    <Replace>_LOADREF                 @RCLSTR1                 </Replace>
+    <Replace>_INDEX                   @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="strconst_record_read">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_LOADR                                            </Pattern>
+    <Replace>_STRING                  @RCLSTR1                 </Replace>
+    <Replace>_LOADR                   @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="strconst_array_read">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_INDEX                                            </Pattern>
+    <Replace>_STRING                  @RCLSTR1                 </Replace>
+    <Replace>_INDEX                   @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="not_brz" link="true">
+    <Pattern>_NOT                                              </Pattern>
+    <Pattern>_BRZ       I(*)          @SETINT0                 </Pattern>
+    <Replace>_BRNZ      I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="not_brnz">
+    <Pattern>_NOT                                              </Pattern>
+    <Pattern>_BRNZ      I(*)          @SETINT0                 </Pattern>
+    <Replace>_BRZ       I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_ne_brz">
+    <Pattern>_INTEGER   I(0)                                   </Pattern>
+    <Pattern>_NE                                               </Pattern>
+    <Pattern>_BRZ       I(*)          @SETINT0                 </Pattern>
+    <Replace>_BRZ       I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="ne_brnz">
+    <Pattern>_NE                                               </Pattern>
+    <Pattern>_BRNZ      I(*)          @SETINT0                 </Pattern>
+    <Replace>_NE                      @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="ne_br" linked="true">
+    <Pattern>_NE        I(*)          @SETINT0                 </Pattern>
+    <Pattern>_BR        I(*)          @SETINT1 @TESTNXT0       </Pattern>
+    <Replace>_EQ                      @RCLINT1                 </Replace>
+  </Opt>
+  <Opt name="integer_ne_brnz">
+    <Pattern>_INTEGER   I(0)                                   </Pattern>
+    <Pattern>_NE                                               </Pattern>
+    <Pattern>_BRNZ      I(*)          @SETINT0                 </Pattern>
+    <Replace>_BRNZ      I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_eq_br">
+    <Pattern>_INTEGER   I(0)                                   </Pattern>
+    <Pattern>_EQ                                               </Pattern>
+    <Pattern>_BR        I(*)          @SETINT0                 </Pattern>
+    <Replace>_BRNZ      I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="not_eq">
+    <Pattern>_NOT                                              </Pattern>
+    <Pattern>_EQ        I(*)          @SETINT0                 </Pattern>
+    <Replace>_NE        I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="not_ne">
+    <Pattern>_NOT                                              </Pattern>
+    <Pattern>_NE        I(*)          @SETINT0                 </Pattern>
+    <Replace>_EQ        I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="eq_brz">
+    <Pattern>_EQ                                               </Pattern>
+    <Pattern>_BRZ       I(*)          @SETINT0                 </Pattern>
+    <Replace>_NE        I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="eq_brnz">
+    <Pattern>_EQ                                               </Pattern>
+    <Pattern>_BRNZ      I(*)          @SETINT0                 </Pattern>
+    <Replace>_EQ        I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integr_ne">
+    <Pattern>_INTEGER   I(0)                                   </Pattern>
+    <Pattern>_NE        I(*)          @SETINT0                 </Pattern>
+    <Replace>_BRNZ                    @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_le">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_LE                                               </Pattern>
+    <Replace>_LE                      @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_gt">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_GT                                               </Pattern>
+    <Replace>_GT                      @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_ge">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_GE                                               </Pattern>
+    <Replace>_GE                      @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_lt">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_LT                                               </Pattern>
+    <Replace>_LT                      @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="storint">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_STOR      S(*)          @SETSTR0                 </Pattern>
+    <Replace>_STORINT                 @RCLINT0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="stordbl">
+    <Pattern>_DOUBLE    D(*)          @SETDBL0                 </Pattern>
+    <Pattern>_STOR      S(*)          @SETSTR0                 </Pattern>
+    <Replace>_STORDBL                 @RCLDBL0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="storbool">
+    <Pattern>_BOOL      I(*)          @SETINT0                 </Pattern>
+    <Pattern>_STOR      S(*)          @SETSTR0                 </Pattern>
+    <Replace>_STORBOOL                @RCLINT0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="int_dclvar">
+    <Pattern>_DCLVAR    I(11) S(*)    @SETSTR0                 </Pattern>
+    <Pattern>_STORINT   I(0) S(*)     @TESTSTR0                </Pattern>
+    <Replace>_DCLVAR    I(11) S(*)    @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="bool_dclvar">
+    <Pattern>_DCLVAR    I(10) S(*)    @SETSTR0                 </Pattern>
+    <Pattern>_STORBOOL  I(0) S(*)     @TESTSTR0                </Pattern>
+    <Replace>_DCLVAR    I(10) S(*)    @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="double_dclvar">
+    <Pattern>_DCLVAR    I(12) S(*)    @SETSTR0                 </Pattern>
+    <Pattern>_STORDBL   D(0.0) S(*)   @TESTSTR0                </Pattern>
+    <Replace>_DCLVAR    I(12) S(*)    @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="string_dclvar">
+    <Pattern>_DCLVAR    I(20) S(*)    @SETSTR0                 </Pattern>
+    <Pattern>_STRING    S("")                                  </Pattern>
+    <Pattern>_STOR      S(*)          @TESTSTR0                </Pattern>
+    <Replace>_DCLVAR    I(20) S(*)    @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="result_stor">
+    <Pattern>_RESULT                                           </Pattern>
+    <Pattern>_STOR      S(*)          @SETSTR0                 </Pattern>
+    <Replace>_RESULT                  @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="cvt_out">
+    <Pattern>_CVT       I(21)                                  </Pattern>
+    <Pattern>_OUT       I(*)          @SETINT0                 </Pattern>
+    <Replace>_OUT                     @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="cvt_outnl">
+    <Pattern>_CVT       I(21)                                  </Pattern>
+    <Pattern>_OUTNL     I(*)          @SETINT0                 </Pattern>
+    <Replace>_OUTNL                   @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="string_out">
+    <Pattern>_STRING    S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_OUT       I(*)          @SETINT0                 </Pattern>
+    <Replace>_OUT                     @RCLINT0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="string_outnl">
+    <Pattern>_STRING    S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_OUTNL     I(*)          @SETINT0                 </Pattern>
+    <Replace>_OUTNL                   @RCLINT0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="loadref_dupref">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_LOADREF   S(*)          @TESTSTR0                </Pattern>
+    <Replace>_LOADREF                 @RCLSTR0                 </Replace>
+    <Replace>_DUPREF                                           </Replace>
+  </Opt>
+  <Opt name="load_dup">
+    <Pattern>_LOAD      S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_LOAD      S(*)          @TESTSTR0                </Pattern>
+    <Replace>_LOAD                    @RCLSTR0                 </Replace>
+    <Replace>_DUP                                              </Replace>
+  </Opt>
+  <Opt name="redundant_int_cvt">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_CVT       I(11)                                  </Pattern>
+    <Replace>_INTEGER                 @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="redundant_setscope">
+    <Pattern>_SETSCOPE  I(*)          @SETINT0                 </Pattern>
+    <Pattern>_SETSCOPE  I(*)          @TESTINT0                </Pattern>
+    <Replace>_SETSCOPE                @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="strconst_concat">
+    <Pattern>_STRING    S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_CONCAT                                           </Pattern>
+    <Replace>_CONCAT                  @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="linked_forx">
+    <Pattern>_INTEGER   I(1)                                   </Pattern>
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_INTEGER   I(1)                                   </Pattern>
+    <Pattern>_FOR       I(*) S(*)     @SETINT1 @SETSTR1        </Pattern>
+    <Replace>_LOADREF                 @RCLSTR0                 </Replace>
+    <Replace>_FORX                    @RCLINT1 @RCLSTR1        </Replace>
+  </Opt>
+  <Opt name="unlinked_forx">
+    <Pattern>_INTEGER   I(1)                                   </Pattern>
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_INTEGER   I(1)                                   </Pattern>
+    <Pattern>_FOR       S(*)          @SETSTR1                 </Pattern>
+    <Replace>_LOADREF                 @RCLSTR0                 </Replace>
+    <Replace>_FORX                    @RCLSTR1                 </Replace>
+  </Opt>
+  <Opt name="linked_int_forx">
+    <Pattern>_INTEGER   I(1)                                   </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_INTEGER   I(1)                                   </Pattern>
+    <Pattern>_FOR       I(*) S(*)     @SETINT1 @SETSTR1        </Pattern>
+    <Replace>_INTEGER                 @RCLINT0                 </Replace>
+    <Replace>_FORX                    @RCLINT1 @RCLSTR1        </Replace>
+  </Opt>
+  <Opt name="unlinked_int_forx">
+    <Pattern>_INTEGER   I(1)                                   </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_INTEGER   I(1)                                   </Pattern>
+    <Pattern>_FOR       S(*)          @SETSTR1                 </Pattern>
+    <Replace>_INTEGER                 @RCLINT0                 </Replace>
+    <Replace>_FORX                    @RCLSTR1                 </Replace>
+  </Opt>
+  <Opt name="loadref_cvt">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_CVT       I(*)          @SETINT0                 </Pattern>
+    <Replace>_LOAD                    @RCLINT0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="intcont_index">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_INDEX                                            </Pattern>
+    <Replace>_INDEX                   @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="optimization_55">
+    <Pattern>_INTEGER   I(0)                                   </Pattern>
+    <Pattern>_NE                                               </Pattern>
+    <Replace>_CVT       I(10)                                  </Replace>
+  </Opt>
+  <Opt name="index">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_INDEX     I(*)          @SETINT0                 </Pattern>
+    <Replace>_INDEX                   @RCLINT0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="noteof">
+    <Pattern>_EOF                                              </Pattern>
+    <Pattern>_NOT                                              </Pattern>
+    <Replace>_NOTEOF                                           </Replace>
+  </Opt>
+  <Opt name="eof">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_EOF                                              </Pattern>
+    <Replace>_EOF                     @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="strcvt_concat">
+    <Pattern>_CVT       I(20)                                  </Pattern>
+    <Pattern>_CONCAT                                           </Pattern>
+    <Replace>_CONCAT                                           </Replace>
+  </Opt>
+  <Opt name="length">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_LENGTH                                           </Pattern>
+    <Replace>_LENGTH                  @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="read">
+    <Pattern>_READ                                             </Pattern>
+    <Pattern>_STOR      S(*)          @SETSTR0                 </Pattern>
+    <Replace>_READ                    @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="array_cvt">
+    <Pattern>_ARRAY     I(*)          @SETINT0                 </Pattern>
+    <Pattern>_CVT       I(30)                                  </Pattern>
+    <Replace>_ARRAY     I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="str_str_concat">
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_STRING    S(*)          @SETSTR2                 </Pattern>
+    <Pattern>_CONCAT                                           </Pattern>
+    <Replace>_STRING                  @CAT12 @RCLSTR2          </Replace>
+  </Opt>
+  <Opt name="str_str_add">
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_STRING    S(*)          @SETSTR2                 </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Replace>_STRING                  @CAT12 @RCLSTR2          </Replace>
+  </Opt>
+  <Opt name="integer_incr">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Pattern>_STOR      S(*)          @TESTSTR0                </Pattern>
+    <Replace>_INCR                    @RCLINT0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="integer_decr">
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_SUB                                              </Pattern>
+    <Pattern>_STOR      S(*)          @TESTSTR0                </Pattern>
+    <Replace>_INCR                    @NEG0 @RCLINT0 @RCLSTR0  </Replace>
+  </Opt>
+  <Opt name="newline_nl">
+    <Pattern>_CONCAT    I(10)                                  </Pattern>
+    <Pattern>_OUT       I(*)          @SETINT0                 </Pattern>
+    <Replace>_OUTNL     I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="double_negate">
+    <Pattern>_DOUBLE    D(*)          @SETDBL0                 </Pattern>
+    <Pattern>_NEGATE                                           </Pattern>
+    <Replace>_DOUBLE                  @NEGD0 @RCLDBL0          </Replace>
+  </Opt>
+  <Opt name="integer_negate">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_NEGATE                                           </Pattern>
+    <Replace>_INTEGER                 @NEG0 @RCLINT0           </Replace>
+  </Opt>
+  <Opt name="integer_load_multi">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_MULT                                             </Pattern>
+    <Replace>_LOADREF                 @RCLSTR0                 </Replace>
+    <Replace>_MULTI                   @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_load_addi">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_LOADREF   S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Replace>_LOADREF                 @RCLSTR0                 </Replace>
+    <Replace>_ADDI                    @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_addi">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Replace>_ADDI                    @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_multi">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_MULT                                             </Pattern>
+    <Replace>_MULTI                   @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_subi">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_SUB                                              </Pattern>
+    <Replace>_SUBI                    @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="integer_divi">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_DIV                                              </Pattern>
+    <Replace>_DIVI                    @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="strconst_length">
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_LENGTH                                           </Pattern>
+    <Replace>_INTEGER   I(0)          @LENGTH1 @RCLINT1        </Replace>
+  </Opt>
+  <Opt name="not_bool">
+    <Pattern>_BOOL      I(*)          @SETINT1                 </Pattern>
+    <Pattern>_NOT                                              </Pattern>
+    <Replace>_BOOL      I(0)          @NOT1 @RCLINT1           </Replace>
+  </Opt>
+  <Opt name="not_integer">
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_NOT                                              </Pattern>
+    <Replace>_BOOL      I(0)          @NOT1 @RCLINT1           </Replace>
+  </Opt>
+  <Opt name="string_lock">
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_LOCK      I(*)          @SETINT1                 </Pattern>
+    <Replace>_LOCK                    @RCLINT1 @RCLSTR1        </Replace>
+  </Opt>
+  <Opt name="string_unlock">
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_UNLOCK                                           </Pattern>
+    <Replace>_UNLOCK                  @RCLSTR1                 </Replace>
+  </Opt>
+  <Opt name="typechk">
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_PROTOTYPE                                        </Pattern>
+    <Pattern>_TYPECHK                                          </Pattern>
+    <Replace>_TYPECHK                 @RCLSTR1                 </Replace>
+  </Opt>
+  <Opt name="prototype">
+    <Pattern>_STRING    S(*)          @SETSTR1                 </Pattern>
+    <Pattern>_PROTOTYPE                                        </Pattern>
+    <Replace>_PROTOTYPE               @RCLSTR1                 </Replace>
+  </Opt>
+  <Opt name="newline">
+    <Pattern>_CHAR      I(10)                                  </Pattern>
+    <Pattern>_OUT       I(*)          @SETINT0                 </Pattern>
+    <Replace>_NL        I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="intconst_right">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_RIGHT                                            </Pattern>
+    <Replace>_RIGHT     I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="intconst_left">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_LEFT                                             </Pattern>
+    <Replace>_LEFT      I(0)          @RCLINT0                 </Replace>
+  </Opt>
+  <Opt name="strconst_package0">
+    <Pattern>_STRING    S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_PACKAGE   I(0)                                   </Pattern>
+    <Replace>_PACKAGE   I(0)          @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="strconst_package1">
+    <Pattern>_STRING    S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_PACKAGE   I(1)                                   </Pattern>
+    <Replace>_PACKAGE   I(1)          @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="delete_noop">
+    <Pattern>_NOOP                                             </Pattern>
+  </Opt>
+  <Opt name="redundant_int_cvt">
+    <Pattern>_CVT       I(*)          @SETINT0                 </Pattern>
+    <Pattern>_CVT       I(*) S(*)     @TESTINT0 @SETSTR0       </Pattern>
+    <Replace>_CVT                     @RCLINT0 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="intconst_formatted">
+    <Pattern>_INTEGER   I(*)          @SETINT0                 </Pattern>
+    <Pattern>_OUTNL     I(*)          @SETINT1                 </Pattern>
+    <Replace>_OUTNL     I(0)          @INTSTR0 @RCLSTR0 @RCLINT1</Replace>
+  </Opt>
+  <Opt name="dblconst_formatted">
+    <Pattern>_DOUBLE    D(*)          @SETDBL0                 </Pattern>
+    <Pattern>_OUTNL     I(*)          @SETINT1                 </Pattern>
+    <Replace>_OUTNL     I(0)          @DBLSTR0 @RCLSTR0 @RCLINT1</Replace>
+  </Opt>
+  <Opt name="empty_stmt">
+    <Pattern>_STMT      I(*)          @SETINT0                 </Pattern>
+    <Pattern>_STMT      I(*)          @SETINT1                 </Pattern>
+    <Replace>_STMT      I(0)          @RCLINT1                 </Replace>
+  </Opt>
+  <Opt name="if_true">
+    <Pattern>_BOOL      I(1)                                   </Pattern>
+    <Pattern>_BRZ       I(*)                                   </Pattern>
+  </Opt>
+  <Opt name="if_false">
+    <Pattern>_BOOL      I(0)                                   </Pattern>
+    <Pattern>_BRZ       I(*)          @SETINT1                 </Pattern>
+    <Replace>_BR        I(0)          @RCLINT1                 </Replace>
+  </Opt>
+  <Opt name="not_brz">
+    <Pattern>_NOT                                              </Pattern>
+    <Pattern>_BRZ       I(*)          @SETINT1                 </Pattern>
+    <Replace>_BRNZ      I(0)          @RCLINT1                 </Replace>
+  </Opt>
+  <Opt name="br_goto" linked="true">
+    <Pattern>_NE        I(*)          @SETINT0                 </Pattern>
+    <Pattern>_STMT      I(0)                                   </Pattern>
+    <Pattern>_BR        I(*)          @SETINT1 @TESTNXT0       </Pattern>
+    <Replace>_EQ                      @RCLINT1                 </Replace>
+  </Opt>
+  <Opt name="br_goto2" linked="true">
+    <Pattern>_NE        I(*)          @SETINT0                 </Pattern>
+    <Pattern>_BR        I(*)          @SETINT1 @TESTNXT0       </Pattern>
+    <Replace>_EQ                      @RCLINT1                 </Replace>
+  </Opt>
+  <Opt name="multi_multi">
+    <Pattern>_MULTI     I(*)          @SETINT1                 </Pattern>
+    <Pattern>_MULTI     I(*)          @SETINT2                 </Pattern>
+    <Replace>_MULTI     I(0)          @MULT12 @RCLINT2         </Replace>
+  </Opt>
+  <Opt name="addi_addi">
+    <Pattern>_ADDI      I(*)          @SETINT1                 </Pattern>
+    <Pattern>_ADDI      I(*)          @SETINT2                 </Pattern>
+    <Replace>_ADDI      I(0)          @ADD12 @RCLINT2          </Replace>
+  </Opt>
+  <Opt name="sql_mode_joins">
+    <Pattern>_STORBOOL  I(0) S("__SQL_SELECT_ACTIVE")          </Pattern>
+    <Pattern>_STORBOOL  I(1) S("__SQL_SELECT_ACTIVE")          </Pattern>
+  </Opt>
+  <Opt name="add1">
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_LOCREF    S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_SWAP                                             </Pattern>
+    <Pattern>_ADD                                              </Pattern>
+    <Pattern>_LOCREF    S(*)          @TESTSTR0                </Pattern>
+    <Pattern>_SET                                              </Pattern>
+    <Replace>_INCR                    @RCLINT1 @RCLSTR0        </Replace>
+  </Opt>
+  <Opt name="sub1">
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_LOCREF    S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_SWAP                                             </Pattern>
+    <Pattern>_SUB                                              </Pattern>
+    <Pattern>_LOCREF    S(*)          @TESTSTR0                </Pattern>
+    <Pattern>_SET                                              </Pattern>
+    <Replace>_INCR                    @NEG1 @RCLINT1 @RCLSTR0  </Replace>
+  </Opt>
+  <Opt name="mult1">
+    <Pattern>_INTEGER   I(*)          @SETINT1                 </Pattern>
+    <Pattern>_LOCREF    S(*)          @SETSTR0                 </Pattern>
+    <Pattern>_MULT                                             </Pattern>
+    <Pattern>_LOCREF    S(*)          @TESTSTR0                </Pattern>
+    <Pattern>_SET                                              </Pattern>
+    <Replace>_LOADREF                 @RCLSTR0                 </Replace>
+    <Replace>_MULTI                   @RCLINT1                 </Replace>
+    <Replace>_STOR                    @RCLSTR0                 </Replace>
+  </Opt>
+  <Opt name="eq0">
+    <Pattern>_INTEGER   I(0)                                   </Pattern>
+    <Pattern>_EQ                                               </Pattern>
+    <Replace>_NOT                                              </Replace>
+  </Opt>
+</Optimizations>

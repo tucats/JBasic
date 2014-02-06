@@ -1,0 +1,2608 @@
+// THIS SOURCE FILE IS PART OF JBASIC, AN OPEN SOURCE PUBLICLY AVAILABLE
+// JAVA SOFTWARE PACKAGE HOSTED BY SOURCEFORGE.NET
+// 
+// THIS SOFTWARE IS PROVIDED VIA THE GNU PUBLIC LICENSE AND IS FREELY
+// AVAILABLE FOR ANY PURPOSE COMMERCIAL OR OTHERWISE AS LONG AS THE AUTHORSHIP
+// AND COPYRIGHT INFORMATION IS RETAINED INTACT AND APPROPRIATELY VISIBLE
+// TO THE END USER.
+// 
+// SEE THE PROJECT FILE AT HTTP://WWW.SOURCEFORGE.NET/PROJECTS/JBASIC FOR
+// MORE INFORMATION.
+// 
+// COPYRIGHT 2003-2011 BY TOM COLE, TOMCOLE@USERS.SF.NET
+//
+verb test
+
+// Implement the TEST command.  This looks for programs with the prefix "TEST$"
+// and runs them, expecting a zero return code.  This lets the user extend the
+// list of unit tests just by writing additional ones, and using the TEST command
+// to re-test JBasic.  You can also run a specific test by using the command
+//
+//          TEST name [trace]
+//
+// The optional inclusion of the word TRACE causes execution trace to be
+// printed for the test run.
+//
+// Or see a list of all test programs defined by using
+//
+//          TEST ?
+//
+
+    tracef = false
+    test_name = ""
+    argc = length($args)
+    set needprompt
+    
+	if argc = 0 then goto show_tests
+	
+	// Make a copy of the argument list ($ARGS is readonly) so we can
+	// zap each parameter as it is consumed, and normalize the case so
+	// we can compare against program names more easily.
+	
+    args = uppercase($ARGS)
+
+	tracef = locate("TRACE", args)
+	if tracef then args[tracef] = ""
+	
+	allFlag = locate("ALL", args)
+	if allFlag then args[allFlag] = "" : goto run_all
+	
+    if argc > 0 then goto scan
+    
+show_tests:
+
+    print "The TEST command executes self-validating tests of various JBasic"
+    print "features.  You can view the tests or add to them by looking in the"
+    print "'Library.jbasic' file.  You invoke one or more tests by naming them"
+    print "on the command line:"
+    print 
+    print "   TEST name1 [name2 [name3...]]"
+    print
+    print "You can use the reserved name ALL to mean run all tests.  You can use"
+    print "the reserved name TRACE to enable tracing of the test(s) run."
+    print
+    print "Here is a list of the available tests:"
+	print 
+	show tests
+	return
+
+run_all:
+    test_name = "*"
+    goto scan
+    
+trace_all:
+    tracef = 1
+    test_name = "*"
+    
+scan:
+    
+	n = length(sys$programs)
+	tc = 0
+	
+	for i = 1 to n
+	
+	   pname = sys$programs[i]
+	   if length(pname) < 7 then goto loop
+	   if substring(pname,1,5) <> "TEST$" then goto loop
+	   if substring(pname,1,6) = "TEST$$" then goto loop
+	   
+	   xname = ""
+	   if test_name = "*" then goto doit
+	   xname = pname - "TEST$"
+	   
+	   found = locate(xname, args)
+	   if found then args[found] = "" : goto doit
+	   
+	   goto loop
+	    
+doit:
+	   tc = tc + 1
+	   print "Executing test "; pname
+	   cmd = "call " + pname + " returns sts"
+	   if tracef then cmd = "trace " + cmd
+	   call using(pname)() returns sts
+	   if sts <> 0 then goto abort
+       
+loop:	
+	next i
+
+// See if any unused keywords are still on the argument list.
+
+	for i = each of args do if i <> "" then print "Test "; i; " not found."
+	
+	if tc = 0 then goto notests
+	if tc = 1 then goto onetest
+	print "Completed "; tc; " tests successfully"
+	return
+
+onetest:
+    print "Completed 1 test successfully"
+    return
+notests:
+    print "No test matched "; test_name
+    return
+    
+abort:
+	print "Test failed with result of "; sts
+	return
+	
+
+program test$array1
+
+	x[5] = 5
+	y  = 4
+	x[y+1] = 55
+	if x[5] <> 55 then return 1
+	if x[1] <> 0 then return 2
+	
+	return 0
+
+program test$array2
+
+	a1 = ["Tom", "Mary"]
+	a2 = ["Billy", "Cindy"]
+	c = [a1,a2]
+	
+	if c[1][1] <> "Tom" then return 111
+	if c[1][2] <> "Mary" then return 112
+	if c[2][1] <> "Billy" then return 121
+	if c[2][2] <> "Cindy" then return 122
+	
+	if c[1,1] <> "Tom" then return 211
+	if c[2,2] <> "Cindy" then return 222
+	return 0
+
+program test$array3
+// Test declarators
+
+   integer x1[3]
+   if type(x1) <> "ARRAY" then return 101
+   if type(x1[1]) <> "INTEGER" then return 102
+   if x1[1] <> 0 then return 103
+   if length(x1) <> 3 then return 104
+   
+   integer x2[2] = 15
+   if type(x2) <> "ARRAY" then return 201
+   if type(x2[1]) <> "INTEGER" then return 202
+   if x2[1] <> 15 then return 203
+   if x2[2] <> 15 then return 203
+   if length(x1) <> 3 then return 204
+   
+   string x3[2] = "Tom"
+   if type(x3) <> "ARRAY" then return 301
+   if type(x3[1]) <> "STRING" then return 302
+   if x3 <> [ "Tom", "Tom" ] then return 303
+   if length(x3) <> 2 then return 304
+   
+   double x4[2] = 3.14
+   if x4 <> [3.14, 3.14] then return 401
+   
+   boolean x5[3] = true
+   if x5 <> [true, true, true] then return 501
+   
+   array x6[2] = [55,44]
+   if x6 <> [[55,44],[55,44]] then return 601
+   return 0
+  
+program test$array4
+// Test of range specifications
+   x = [ 101, 102, 103, 104, 105]
+   y = x[2..4]
+   ix1 = 3
+   ix2 = 4
+   z = x[ix1-1 .. ix2]
+   n = x[4..3]
+   
+   if y <> [102, 103, 104] then return 101
+   if z <> [102, 103, 104] then return 102
+   if n <> [] then return 103
+   return 0
+
+program test$array5
+// Test of selection lists and indicators for array subscripts
+// Index containing array of integers is a list of indexes to
+//    use to create result set array
+// Index containing arrays of booleans is a list of selectors
+//    showing if corresponding element is included or not.
+// No other data type is permitted in selection list array.
+
+   x = ["Tom", "Sue", "Mary", "Bob", "Donna", "Joe"]
+   x1 = [1,3,4,5]
+   x2 = [true, false, false, true, false, true]
+   if x[x1] <> ["Tom", "Mary", "Bob", "Donna"] then return 101
+   if x[x2] <> ["Tom", "Bob", "Joe"] then return 102
+   return 0
+
+program test$array6
+// Verify we don't break unique object creation when nested
+// constant arrays are created (regression)
+
+   X = [1,2,3]
+   Y = [ X, {X:X} ]
+   X[3] = 33
+   if y[1] <> [1,2,3] then return 100
+   if y[2].x <> [1,2,3] then return 101
+   return 0
+
+program test$array7
+// Test array concatenation and deletion (regression)
+
+   x = [1,2,3,4,5]
+   if x-2 <> [1,3,4,5] then return 101
+   if x-[3] <> [1,2,4,5] then return 102
+   if x-[4,5] <> [1,2,3] then return 103
+   if x-x <> [] then return 104
+   if x+6 <> [1,2,3,4,5,6] then return 201
+   if x+[7] <> [1,2,3,4,5,7] then return 202
+   if array(x+6)+7 <> [1,2,3,4,5,6,7] then return 203 // Cast required to prevent optimization to x+13
+   if x+x <> [1,2,3,4,5,1,2,3,4,5] then return 204
+   return 0
+   
+program test$bool1
+// Test of boolean operations
+
+	x = 1
+	y = 0
+	
+	if y then return 1
+	if !x then return 2
+	if not x then return 3
+	if not not y then return 4
+	if x & y then return 5
+	if (x | y ) <> true then return 6
+	if !(x | y )  then return 7
+	if not( x | y ) then return 8
+	if not( x or y ) then return 9
+	if !(x & 1) then return 10
+	if not ( x and true ) then return 11
+	if not x and not true then return 12
+	return 0
+	
+	
+program test$call1
+// Test of calling another program, passing in parameters and getting a result.
+
+	sub$program = "test$$sub"
+	load if  sub$program  // Only loads if not already in memory
+	
+	parent = "Natasha"
+	call using(sub$program) ( "Tom", 44 ) returns age
+    if age <> 88 then return age
+    
+return 0
+
+
+program test$$sub( x, age )
+// Here is the subroutine.  Note that because it starts with TEST$$ it 
+// does not show up in the list of tests that can be directly invoked.
+
+    if x <> "Tom" then return 2
+    if age <> 44 then return 3
+    if parent <> "Natasha" then return 4
+    
+return age * 2
+
+program test$call2
+// Test of various parameter list passing strategies, including both
+// varying argument lists and explicitly named positional parameters
+
+    call test$$call2A("test") returns rc
+    if rc <> 0 then return rc
+    
+    call test$$call2b(1,2,3) returns rc
+    if rc <> 0 then return rc
+    
+    call test$$call2c(1,2,3,4) returns rc
+    if rc <> 0 then return rc
+    
+    return 0
+    
+program test$$call2a( string )
+    if string <> "test" then return 101
+    if length($args) <> 1 then return 102
+    if $args[1] <> "test" then return 103
+    return 0
+    
+program test$$call2b( a,b,c)
+    if a <> 1 then return 201
+    if b <> 2 then return 202
+    if c <> 3 then return 203
+    if length($args) <> 3 then return 204
+    if $args[1] <> 1 then return 211
+    if $args[2] <> 2 then return 212
+    if $args[3] <> 3 then return 213
+    return 0
+
+program test$$call2c(...)
+    if length($args) <> 4 then return 301
+    if $args[1] <> 1 then return 302
+    if $args[2] <> 2 then return 303
+    if $args[3] <> 3 then return 304
+    if $args[4] <> 4 then return 305
+
+    return 0
+    
+
+program test$data1
+
+	data 101, "Tom", [ 3, 2 ]
+	read x, y, z
+	if x <> 101 then return 101
+	if y <> "Tom" then return 102
+	if z[1] <> 3 then return 103
+	return 0
+
+program test$data2
+
+	data 101, 102, 103, 104
+	read x, y
+	if x <> 101 then return 101
+	if y <> 102 then return 102
+	rewind
+	read z
+	if z <> 101 then return 103
+	if eod() then return 104
+	read m1, m2, m3
+	if m1 <> 102 then return 105
+	if m2 <> 103 then return 106
+	if m3 <> 104 then return 107
+	if not eod() then return 108
+	read m4
+	if m4 <> 101 then return 109
+	return 0
+
+program test$data3
+
+	data 101
+	data 102
+	data 103
+	read x1, x2, x3, x4
+	
+	if x1 <> 101 then return 101
+	if x2 <> 102 then return 102
+	if x3 <> 103 then return 103
+	if x4 <> 101 then return 104
+	return 0
+
+    
+100 program test$data4
+110 // Test rewind to locations
+112 // DO NOT RENUMBER THIS PROGRAM CARELESSLY !
+115 data 1, 2, 3
+120 data 101, 102, 103
+130 foo:
+140 data 201, 202, 203
+150 read x, y // 1 and 2
+160 rewind 120
+170 read z
+180 if z <> 101 then return 101
+190 rewind foo : read z
+200 if z <> 201 then return 201
+210 return 0
+
+program test$data5
+// Verify that EOD is signaled when there is no 
+// data to read at all
+
+    on eod then goto done
+
+    read d
+    return 104
+done:
+    return 0
+
+program test$decimal1
+// Test of DECIMAL data type
+
+   decimal D = 3.14
+   if type(d) <> "DECIMAL(2)" THEN RETURN 101
+   d = 3999999999999999999
+   if type(d) <> "DECIMAL" THEN RETURN 102
+   decimal(2) d2 = 3.141414
+   if d2 <> decimal(3.14,2) then return 103
+   if decimal(3.14) <> 3 then return 104
+   
+   if D + 1 <> 4000000000000000000 then return 201
+   if d -1 + 2 <> 4000000000000000000 then return 202
+   x  = d + 1
+   if x*2 <> 8000000000000000000 then return 203
+   if x/2 <> 2000000000000000000 then return 204
+   
+   return 0
+   
+program test$declare1
+// Test the various DECLARE statements
+
+   
+    boolean b1, b2[3], b3[2]=true
+   if type(b1) <> "BOOLEAN" then return 101
+   if b1 <> false then return 102
+   if length(b2) <> 3 then return 103
+   if type(b2) <> "ARRAY" then return 104
+   if b2 <> [false,false,false] then return 105
+   if length(b3) <> 2 then return 106
+   if b3 <> [true,true] then return 107
+  
+    integer i1, i2[4], i3[5]=6
+   if type(i1) <> "INTEGER" then return 201
+   if i1 <> 0 then return 202
+   if length(i2) <> 4 then return 203
+   if type(i2) <> "ARRAY" then return 204
+   if i2 <> [0,0,0,0] then return 205
+   if length(i3) <> 5 then return 206
+   if i3 <> [6,6,6,6,6] then return 207
+   if type(i3[1]) <> "INTEGER" then return 208
+ 
+   double  d1, d2[2], d3[4]=3.5
+   if type(d1) <> "DOUBLE" then return 301
+   if d1 <> 0.0 then return 302
+   if length(d2) <> 2 then return 303
+   if type(d2) <> "ARRAY" then return 304
+   if d2 <> [0.0, 0.0] then return 305
+   if length(d3) <> 4 then return 306
+   if d3 <> [3.5, 3.5, 3.5, 3.5] then return 307
+   if type(d3[3]) <> "DOUBLE" then return 308
+   
+   string  s1, s2[5], s3[3]="AB"
+   if type(s1) <> "STRING" then return 301
+   if s1 <> "" then return 302
+   if length(s2) <> 5 then return 303
+   if type(s2) <> "ARRAY" then return 304
+   if s2 <> ["", "", "", "", ""] then return 305
+   if length(s3) <> 3 then return 306
+   if s3 <> ["AB", "AB", "AB"] then return 307
+   if type(s3[3]) <> "STRING" then return 308
+  
+   array   a1[2], a2[3]=5, a3[2]=[1,2]
+   if type(a1) <> "ARRAY" then return 401
+   if a1 <> [[], []] then return 402
+   if length(a2) <> 3 then return 403
+   if type(a2) <> "ARRAY" then return 404
+   if a2 <> [[5],[5],[5]] then return 405
+   if length(a3) <> 2 then return 406
+   if a3 <> [[1,2],[1,2]] then return 407
+   if type(a3[2]) <> "ARRAY" then return 408
+   if type(a3[2,1]) <> "INTEGER" then return 409
+   
+   return 0
+   
+program test$declare2
+// Test _STORALL bug fix
+
+    array a1[2] = [1,2]
+    
+    a1[1,2] = "TEST"
+    if a1 <> [ [ 1, "TEST" ], [ 1, 2 ] ] then return 101
+    
+    return 0
+
+program test$declare3
+// Test alternate syntaxes
+
+   DIM INTEGER X1[3]
+   DIM X2[2] AS INTEGER
+   
+   if type(x1) <> "ARRAY" then return 101
+   if type(x1[1]) <> "INTEGER" then return 102
+
+   if type(x2) <> "ARRAY" then return 101
+   if type(x2[1]) <> "INTEGER" then return 102
+   return 0
+   
+   
+program test$do1
+// Test of DO-UNTIL.  Should iterate exactly 3 times.
+
+	x = 0
+	count = 0
+	do
+		x = x + 1
+		y = x * 2 // busy work
+		count = count + 1
+	until x >= 3
+	if count <> 3 then return 1
+	
+return 0
+
+program test$do2
+// Test of DO-WHILE
+
+	x = 0
+	count = 4
+	do
+		x = x + 2
+		count = count - 1
+	while count > 0
+	if x <> 8 then return 1
+	return 0
+
+program test$do3
+// Test of CONTINUE LOOP and END LOOP
+
+    x = 0
+    y = 0
+    do while x < 4
+      y = y + x
+      x = x + 1
+      if x < 3 then continue loop
+      end loop
+    loop
+    if x <> 3 then return 101
+    
+    x = 0
+    y = 0
+    do while x < 4
+      y = y + x
+      x = x + 1
+      if x = 3 then END LOOP
+    loop
+    
+    if x <> 3 then return 100 + x
+    
+    return 0
+
+program test$error1
+
+// Test of ON ERROR
+
+
+    on unkvar goto error_state
+    on error goto error_state
+    syntax error
+    return 1
+
+error_state:
+	if sys$status.code <> "VERB" then return -1
+	if sys$status.parm <> "Syntax" then return -2
+	
+	m = message(sys$status.code, sys$status.parm)
+	if m <> "Unrecognized verb Syntax" then return -3
+ 
+    return 0
+    
+
+program test$error2
+
+// Test of ON UNKVAR
+
+    on unkvar goto error_state
+    on verb goto error_state
+    
+    xxxx = YYYYYYYYYY
+    return 1
+error_state:
+	if sys$status.code <> "UNKVAR" then return -1
+	if sys$status.parm  <> "YYYYYYYYYY" then return -2
+	m = message(sys$status.code, sys$status.parm)
+	
+	if m <> "Unknown or invalid name 'YYYYYYYYYY'" then return -3
+	
+    return 0
+ 
+program test$error3
+// Test of ON VERB THEN GOSUB, the gosub form
+// of the error handler.
+
+   state = 101
+   on verb then gosub handler
+   bubba
+   state = state + 1
+   return state
+   
+handler:
+   state = -1
+   return
+   
+ 1000           PROGRAM TEST$EXECUTE1
+ 1010           // Version: 1.0
+ 1020           // Date:    Fri Aug 14 10:32:15 EDT 2009
+ 1030           // Author:  cole
+ 1035           // Test EXECUTE in a program (regression)
+ 1040           EXECUTE "XX=33"
+ 1050           IF XX <> 33 THEN RETURN 101
+ 1060           RETURN 0
+
+program test$execute2
+// Test permissions handling
+execute sandbox "x=files()" returns sts
+if sts.code <> "SANDBOX" then return 101
+if sts.parm <> "DIR_IO" then return 102
+execute sandbox(java) "x=files()" returns sts
+if sts.code <> "SANDBOX" then return 103
+execute sandbox(dir_io) "X=files()" returns sts
+if sts.code <> "*SUCCESS" then return 104
+return 0
+
+program test$exp1
+// Basic arithmetic expression ordering
+
+	dim x as double
+	dim y as double
+	
+	y = 1
+	if y <> 1 then return 101
+	
+	x = y + 3
+	if x <> 4 then return 102
+	
+	x = y + 3 * 2
+	if x <> 7 then return 103
+	
+	x = 2 * 3 + y
+	if x <> 7 then return 104
+	
+	x = (y+3)*2
+	if x <> 8 then return 105
+	
+	x = y * 4 / 2
+	if x <> 2 then return 106
+	
+	x = y + 2 * y * 4 + 3 * y / 3.0
+	if x <> 10 then return 107
+	
+	x = ((y+2)*y*(4+3)*y)/3.0
+	if x <> 7 then return 108
+	
+	return 0
+
+program test$exp2
+// Automatic type conversions in subexpressions
+	dim one as double
+	dim two as double
+	
+	one = 1.0
+	two = 2.0
+	
+	dim five as integer
+	dim three as integer
+	
+	five = 5
+	three = 3
+	
+	dim x as double
+	
+	x = five / 3
+	if x <> 1 then return 101
+	
+	x = five / two
+	if x <> 2.5 then return 102
+	
+	x = five / 2.5 * two + one
+	if x <> 5 then return 103
+	
+	x = 5 / double("2.5")
+	if x <> 2 then return 104
+	
+	return 0
+
+program test$exp3
+//  Test of basic math operations
+
+    v = 2
+	x = 1
+	y = 100
+	z = 5
+	q = 2.2
+	r = 5.5
+	
+	if x+y <> 101 then return 101
+	if y-z <> 95  then return 102
+	if z*v <> 10 then return 103
+	if y/z <> 20 then return 104
+	
+	if q+r <> 7.7 then return 201
+	if r-q <> 3.3 then return 202
+
+	if (z*2)^2 <> y then return 301
+	if z % 2 <> 1 then return 302
+	if y % 2 <> 0 then return 303
+	
+	// multiply and divide have precision problems right now
+	
+	return 0
+
+program test$exp4
+// additional operator precedence tests
+
+	dim x as double
+	dim y as double
+	
+	x = 2.0
+	y = 3.0
+	
+	if x <> 2 or y <> 3 then return 101
+	if x+y <> 5 or x * y <> x + 4 then return 102
+	return 0
+
+program test$exp5
+// Test MID(...) for GWBASIC compatibility.
+
+
+	name = "abcd"
+	mid$(name,2,3) = "XY"
+	if name <> "aXYd" then return 101
+	mid$(name,2,3) = "TOM"
+	if name <> "aTOd" then return 102
+	dim x[1] as string
+	x[1] = name
+	mid$(x[1], 2,2) = "M"
+	if x[1] <> "aMOd" then return 103
+		
+	return 0
+		
+program test$exp6
+// Test of various constant expressions
+
+        x = 3
+	if type(x) <> "INTEGER" then return 101
+	if x <> integer(3.0) then return 102
+
+	x = 3.
+	if type(x) <> "DOUBLE" then return 201
+	if x <> double(3) then return 202
+
+	x = 3.5
+	if type(X) <> "DOUBLE" then return 301
+	if x <> 3 + (.5) then return 302
+	x = -3.5
+	if type(x) <> "DOUBLE" then return 401
+	if x <> (0 - 3) - .5 then return 402
+	
+	x = 3.5e3
+	if type(x) <> "DOUBLE" then return 501
+	if x <> integer(3500) then return 502
+	
+	x = 4500e-2
+	if type(x) <> "DOUBLE" then return 601
+	if x <> integer(45) then return 602
+	
+	x = -.3
+	if type(x) <> "DOUBLE" then return 701
+	if x <> 0-(3/10.0) then return 702
+	
+	
+	return 0
+
+program test$file01
+
+// Test of simple file IO functions.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	fn = "jb_ftest.txt"
+	open file fn for output as names
+	print file names, "1.0"
+	print file names, "2.0"
+	print file names, "3.0"
+	print file names, "4.0"
+	close names
+	
+	open file fn for input as names
+    count = 0
+    x = 0
+    
+row: 
+    input file names, v
+    x = x + number(v)
+   	count = count + 1
+	if not eof(names) then goto row
+	close names
+	if count <> 4 then return 1
+	if x <> 10 then return 2
+	kill fn
+	return 0
+
+program test$file02
+//  Test of OPEN APPEND
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	fn = "jb_append.txt"
+	open file fn for output as #3
+	print #3, "First"
+	close #3
+	
+	open file fn for append as aa
+	print  file aa, "Second"
+	close file aa
+	
+	open file fn for input as #4
+	line input #4, xstr
+	if xstr <> "First" then return 1
+	line input #4, xstr
+	if xstr <> "Second" then return 2
+	if !eof(4) then return 3
+	kill #4
+	return 0
+	
+program test$file03
+// Simple test of writing binary data to a file
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open file "bdata.dat" for binary as bd
+	for i = 1 to 5
+	   put file bd, integer i+100
+	next i
+	close bd
+	
+	open file "bdata.dat" for binary as bd
+	recdef = [{ NAME:"N", TYPE:"INTEGER"}]
+	for i = 1 to 5
+	   get file bd, using recdef
+	   if n <> 100+i then return 100+i
+	next i
+
+	kill file bd
+	return 0
+
+program test$file04
+// Test of positioning in binary file
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open file "bdata.dat" for binary as bd
+	x = getpos(bd)
+	if x <> 0 then return x
+	
+	put file bd, integer 1001
+	
+	x = getpos(bd)
+	if x <> 4 then return x
+	
+	seek file bd, 0
+	get file bd, integer v
+	
+	if v <> 1001 then return v
+	kill file bd
+	return 0
+
+program test$file05
+// Test of writing a string to a binary file and reading it back.  Strings
+// are always padded to the given length when STRING(size) syntax is used
+// or a SIZE field exists in the record definition array
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open file "bdata.dat" for binary as bd
+	
+	x1 = "Bob Davis"
+	put file bd, string(20) x1
+	
+	x2 = "Debbie Rawls"
+	put file bd, string(20) x2
+	
+	seek file bd, 0
+	
+	recfmt = [{ type:"STRING", size:20, name:"N1"}, { type:"STRING", size:20, name:"N2"}]
+	
+	get file bd, using recfmt
+	
+	// The results are blank-padded to the field width (20) so we'll need to do a compare
+	// of the padded value.
+	
+	if n1 <> pad(x1, 20) then return 2001
+	if n2 <> pad(x2, 20) then return 2002
+	
+	kill file bd
+	return 0
+
+program test$file06
+// Test of writing a varying length string to a binary file and reading it back.
+// When a VARYING() specification is used, a buffer of the given size is reserved
+// in each record, but an integer length is written before the buffer that tells
+// how many bytes in the buffer actually make up the string.  The buffer must be
+// at least as large as the longest string or truncation will occur.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open file "bdata.dat" for binary as bd
+	
+	x1 = "Bob Davis"
+	put file bd, varying(20) x1
+	
+	x2 = "Debbie Rawls"
+	put file bd, varying(20) x2
+	
+	seek file bd, 0
+	
+	get file bd, varying(20) n1
+	
+	if n1 <> x1 then return 2001
+	
+	get file bd, varying(20) n2
+	if n2 <> x2 then return 2002
+	
+	kill file bd
+	return 0
+	
+program test$file07
+//  More complex BINARY file case with records
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	FIELD EMPREC, STRING(30) NAME, INTEGER ID, DOUBLE SALARY
+	
+	// Create a sample first record
+	
+	name = "COLE, TOM"
+	id = 1001
+	salary = 15.75
+	
+	open file "edata.dat" for binary as ed
+	put file ed, using emprec
+	
+	// Find out how big each record is by measuring the first one
+	
+	size = getpos(ed)
+	kill file ed
+
+	// Now let's load the file for real.  Build an index as well.
+	
+	open file "edata.dat" for binary as ed
+	count = 0
+	idx_key = []
+	idx_pos = []
+	
+load_next:
+	read name, id, salary
+	if id = 0 then goto end_load
+	posn = size*count
+	seek file ed, posn
+	put file ed, using emprec
+	idx_key = idx_key + id
+	idx_pos = idx_pos + posn
+	
+	count = count + 1
+	goto load_next
+
+	data "COLE, TOM", 1001, 15.75
+	data "DAVIS, SUE", 1002, 17.80
+	data "SMITH, BOBBY", 1003, 12.00
+	data "SMITH, FRAN", 1004, 12.50
+	data "", 0, 0
+	
+end_load:
+
+	// Change salary for employee with id 1003
+	// by giving them a 5% raise
+	
+	x = locate( 1003, idx_key )
+	
+	seek file ed, idx_pos[x]
+	get file ed, using emprec
+	
+	salary = round( salary * 1.05, 2)
+	seek file ed, idx_pos[x]
+	put file ed, using emprec
+	
+	// See if the value was updated correctly in the 3rd record
+	
+	seek file ed, 0
+	get file ed, using emprec
+	if salary <> 15.75 then return id
+	get file ed, using emprec
+	if salary <> 17.80 then return id
+	get file ed, using emprec
+	if salary <> 12.60 then return id
+	get file ed, using emprec
+	if salary <> 12.50 then return id
+	
+	//get file ed, using emprec
+	if not eof(ed) then return 999
+	
+	kill file ed
+	return 0	
+
+	
+program test$file08
+//  More complex BINARY file case with records
+//	This is really the same as FILE7 but with
+//	calculated SEEK operations.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	// Here is the definition of an employee record.
+	
+	FIELD EMPLOYEE_DATA, STRING(30) AS NAME, INTEGER AS ID, DOUBLE AS SALARY
+	
+	// Open the binary file, and assign the record description to the file.
+	
+	open binary file "edata.dat" as #1
+	field #1 using employee_data
+	
+	idx_key = []
+	
+load_next:
+	read name, id, salary
+	if id = 0 then goto end_load
+	
+	put #1
+	idx_key = idx_key + id
+	
+	goto load_next
+
+	data "COLE, TOM", 1001, 15.75
+	data "DAVIS, SUE", 1002, 17.80
+	data "SMITH, BOBBY", 1003, 12.00
+	data "SMITH, FRAN", 1004, 12.50
+	data "", 0, 0
+	
+end_load:
+
+	// Change salary for employee with id 1003
+	// by giving them a 5% raise.  Look up the
+	// record number in the index array that was
+	// built when the file was written. 
+	
+	// The logic is 
+	// 1.  Seek to the location, and get the record
+	// 2.  Change the value
+	// 3.  Seek to the location again, and put the record
+	
+	seek #1, locate( 1003, idx_key )
+	get #1
+	
+	salary = round( salary * 1.05, 2)
+	
+	seek #1, locate( 1003, idx_key )
+	put #1
+	
+	// See if the value was updated correctly in the 3rd record
+	// Start at the beginning of the file and read each record,
+	// checking the values.
+	
+	rewind #1
+	
+	get #1
+	if salary <> 15.75 then return id
+	get #1
+	if salary <> 17.80 then return id
+	get #1
+	if salary <> 12.60 then return id
+	get #1
+	if salary <> 12.50 then return id
+	
+	// The end-of-file flag should now be set since we read
+	// the final record.
+	
+	if not eof(1) then return 999
+	
+	kill #1
+	return 0	
+
+program test$file09
+// Version: 1.0
+// Date:    Fri Jun 09 11:03:45 EDT 2006
+// Author:  tom
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+    OPEN BINARY FILE "edata.dat" AS BD
+	FIELD EMPREC AS STRING(30) NAME, INTEGER ID
+    LET NAME = "Tom"
+    LET ID = 1001
+    PUT #BD, USING EMPREC
+    LET NAME = "Mary"
+    LET ID = 1002
+    PUT #BD, USING EMPREC
+    REWIND FILE BD
+    FOR I = 1 TO 2
+        GET #BD, USING EMPREC AS E
+        IF E.ID <> 1000+I THEN RETURN E
+    NEXT I
+    KILL #BD
+    RETURN 0
+    
+program test$file10
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open file "edata.dat" for binary as bd
+	FIELD EMPREC AS STRING(30) NAME, INTEGER ID
+	
+	data { name:"Tom", id:2001 }
+	data { name:"Mary", id:2002 }
+	data 0
+		
+load_data:
+	read v
+	if type(v) <> "RECORD" then goto read_data
+	
+	put #bd, using emprec, from v
+	goto load_data
+
+read_data:
+	REWIND #BD
+    FOR I = 1 TO 2
+        GET #BD, USING EMPREC AS E
+        IF E.ID <> 2000+I THEN RETURN E
+    NEXT I
+    KILL #BD
+    RETURN 0
+
+program test$file11
+//	Reading data from a binary file using explicit record formats,
+//	returned as a record.  Also tests RECORD statement that defines
+//	a record array.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open binary file "edata.dat" as bd
+	
+	FIELD EMPREC AS STRING(30) NAME, INTEGER ID
+	
+	put #bd, using emprec, from { name:"Tom", id:2001 }
+	put #bd, using emprec, from { name:"Mary", id:2002 }
+		
+	REWIND #BD
+    FOR I = 1 TO 2
+        GET #BD, string(30) name, integer id AS E
+        //print e
+        IF E.ID <> 2000+I THEN RETURN E
+    NEXT I
+    KILL #BD
+    RETURN 0
+
+
+program test$file12
+// Test of writing a varying length string to a binary file 
+// and reading it back.  Strings are normally padded to the 
+// given length but VARYING causes a dynamic length to be
+// stored in the binary data as well.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open binary file "bdata.dat" as bd
+
+	x1 = "Bob Davis"
+	put #bd, varying(20) x1
+	
+	x2 = "Debbie Rawls"
+	put #bd, varying(20) x2
+	
+	seek #bd, 0
+	
+	recfmt = [{ type:"VARYING", size:20, name:"N1"}, { type:"VARYING", size:20, name:"N2"}]
+	
+	get #bd, using recfmt
+	
+	// The results are blank-padded to the field width (20) so we'll need to do a compare
+	// of the padded value.
+	
+	if n1 <> x1 then return 2001
+	if n2 <> x2 then return 2002
+	
+	kill #bd
+	return 0
+	
+program test$file13
+//  Test of FIELD statements bound to a file handle, reading
+//	data from a binary file using explicit record formats,
+//	returned as a record.  Also tests RECORD statement that defines
+//	a record array.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open binary file "edata.dat" as #1
+	
+	FIELD #1 AS STRING(30) NAME, INTEGER ID
+	
+	name = "Tom"
+	id = 2001
+	put #1
+	
+	name = "Mary"
+	id = 2002
+	put #1
+	
+	clear name, id
+	
+	REWIND #1
+    FOR I = 1 TO 2
+        GET #1
+        IF ID <> 2000+I THEN RETURN E
+    NEXT I
+    KILL #1
+    RETURN 0
+
+program test$file14
+//  Test varying sizes of integer and double values in a record.  The INTEGER and FLOAT types
+//  accept sizes (in bytes) of the data items. The default for INTEGER is (4) and for FLOAT
+//  the default is 8, which is synonymous with DOUBLE.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+    rcount = 10
+	open binary file "edata.dat" as #1
+	
+	field #1 as integer(1) i_byte, integer(2) i_word, integer i_long, float(4) d_float, double d_double
+	
+	for i = 1 to rcount
+		i_byte = i
+		i_word = 1024+i
+		i_long = 65536+i*1024
+		d_float = 1234.0 * i
+		d_double = 4321.0 * i
+		
+		put #1
+	next i
+	
+	rewind #1
+	count = 0
+	do while(not eof(1))
+	   get #1
+	   count = count + 1
+	   
+	   if i_byte <> count then return 101
+	   if i_word <> 1024 + count then return 102
+	   if i_long <> 65536 + (count*1024) then return 103
+	   if d_float <> 1234.0 * count then return 104
+	   if d_double <> 4321.0 * count then return 105
+	   
+	loop
+	
+	
+	if count <> rcount then print "Count = "; count : return 106
+	kill #1
+	return 0
+
+PROGRAM TEST$FILE15
+  // Test BITFIELDS
+  if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+  LET FNAME = "records.dat"
+  IF EXISTS( FNAME ) THEN KILL FNAME
+  OPEN BINARY FILE FNAME AS # 1
+  // Create a record definition with a bitfield and a double
+  FIELD EMPREC, BITFIELD( 1 AS GENDER, 15 AS ID ), DOUBLE AS AGE
+  LET COUNT = 10
+  FOR ID = 1 TO COUNT
+    LET AGE = 52.5 + ID
+    IF ID = 10 THEN GENDER = 0 ELSE GENDER = 1
+    PUT # 1, USING EMPREC
+  NEXT ID
+  CLOSE # 1
+  FIELD EMPREC2, BITFIELD( 8 AS GENDER, 4 AS MBZ, 4 AS ID ), DOUBLE AS AGE
+  OPEN BINARY FILE FNAME AS # 2
+  LET COUNT = 0
+  DO WHILE( ! EOF( 2 ) )
+    GET # 2, USING EMPREC2
+    ADD 1 TO COUNT
+    IF COUNT = 10 AND GENDER <> 0 THEN RETURN 100+count
+    IF COUNT <> 10 AND GENDER <> 128 THEN RETURN 120+count
+    IF COUNT <> ID THEN RETURN 140+count
+    IF AGE <> 52.5 + COUNT THEN RETURN 160+count
+    IF MBZ <> 0 THEN RETURN 180+count
+  LOOP
+  CLOSE # 2
+  KILL FNAME
+  RETURN 0
+	
+program test$for1
+//  Test of FOR-NEXT, integer index types
+
+	start = 1
+	endPos = 4
+	x = 0
+	for i = start to endPos
+		x = x + i
+	next i
+	if type(i) <> "INTEGER" then return 1
+	if x <> 10 then return 2
+	return 0
+
+program test$for2
+//	Test of FOR-NEXT with nested loops
+
+	x = 0
+	for i = 1 to 3
+		for j = 1 to 2
+		    x = x + ( i * 10 + j)
+		next j
+	next i
+	if x <> 129 then return 1
+	
+return 0
+
+program test$for3
+//	Test of loop that never runs because the ending
+//	condition is met before the program starts.
+
+	count = 0
+	for i = 1 to 0
+		count = count + 1
+	next i
+	
+
+	return count
+
+program test$for4
+//	Test of branch out of a loop and restarting another
+
+	s = 0
+	for i = 1 to 10
+		s = s + (i*10)
+		
+		if i = 5 then goto next_one
+	
+	next i
+	
+next_one:
+	for i = 20 to 25
+	    s = s + (i*2)
+	next i
+	
+	if s <> 420 then return 1
+	return 0
+
+program test$for5
+//  Test of dumping nested loops
+
+	s = 0
+	for i = 1 to 5
+	   for j = 1 to 5
+	      for k = 1 to 5
+	         s = i*100 + j*10 + k
+	         if ( j = 2 ) & ( k = 3 ) then goto next_one
+	      next k
+	   next j
+	next i
+	return 1
+	
+next_one:
+	for j = 10 to 12
+	   s = s + j
+	next j
+	
+	if s <> 156 then return 2
+	
+	return 0
+	
+	
+program test$for6
+// Test of loops on double types
+
+	i=0
+	n=0
+	for i = 0 to 5 by .5
+	n = n + 1
+	next i
+	if type(i) <> "DOUBLE" then return 1
+	if n <> 11 then return 2
+	return 0
+
+program test$for7
+// FOR..EACH and FOR..DO tests
+	x = 0
+    for i = 1 to 5 do x = x + i
+    if x <>  15 then return 101
+    
+    x = 0
+    for i = each of 1, 7, 9
+    x = x + i
+    next i
+    if x <> 17 then return 102
+    
+    x = 1
+    for i = each of [1,2], [3,4]
+      x = x * i
+    next i
+    if x <> 24 then return 103
+    return 0
+
+program test$for8
+// Test END LOOP and CONTINUE LOOP within a FOR..NEXT
+
+    y = 5
+    for i = 1 to 5
+       if i = 3 then end loop
+       y = y + i
+    next i
+    
+    if i <> 3 then return 101
+    if y <> 8 then return 102
+ 
+    y = 0
+    for i = 1 to 5
+       if i = 3 then continue loop
+       y = y + i
+    next i
+    
+    if i <> 6 then return 201
+    if y <> 12 then return 300 + y
+    
+    return 0
+    
+program test$format1
+// Test of FORMAT operations a-la PRINT USING
+
+	x = 3.5225
+	
+	if format(x, "##.##" ) <> " 3.52" then return 1
+	if format(x, "00.#" ) <> "03.5" then return 2
+	if format(x, "###.#####" ) <> "  3.52250" then return 3
+	
+	x = -9.61
+	
+	if format( x, "(##.##)") <> "( 9.61)" then return 4
+	
+	x = -x
+	
+	if format( x, "$$$.##") <> " $9.61" then return 5
+	if format( x, "$###") <> "$  9" then return 6
+	return 0
+
+
+program test$functions1
+//	Test of string functions
+
+	if left("Tom", -2) <> "" then return 101
+	if left("Tom", 55) <> "Tom" then return 102
+	if left("Tom", 0 ) <> "" then return 103
+	if left("Tom", 2 ) <> "To" then return 104
+	
+	if right("Mary", -5) <> "" then return 201
+	if right("Mary", 12) <> "Mary" then return 202
+	if right("Mary", 3) <> "ary" then return 203
+	
+	if lowercase( "Sheep") <> "sheep" then return 301
+	if lowercase( "AbyZ") <> "abyz" then return 302
+	if lowercase( "" ) <> "" then return 303
+
+	if uppercase( "Sheep") <> "SHEEP" then return 401
+	if uppercase( "aByZ") <> "ABYZ" then return 402
+	if uppercase( "" ) <> "" then return 403
+	
+	if mixedcase( "Buddy" ) <> "Buddy" then return 501
+	if mixedcase( "buDDy" ) <> "Buddy" then return 502
+	if mixedcase( "buddY" ) <> "Buddy" then return 503
+	if mixedcase( "" ) <> "" then return 504
+	
+	return 0
+
+program test$functions2
+// Math functions
+
+	x = .123456789
+	
+	if round(x,3) <> 0.123 then return 1
+	if round(sin(2), 3) <> 0.909 then return 2
+	if round(cos(-3),3) <> -0.99 then return 3
+	
+	return 0
+
+program test$functions3
+// Test indirect function calls, and functions in dereferences
+
+// Create all the symbols up front so the two symbol table tests
+// have the same values.
+
+   DIM T[10], T1 AS STRING, S[10], S1 AS STRING, N1 AS STRING
+   DIM X[1], N2 AS STRING
+   
+// First, do it the explicit way
+
+   T = TABLES()
+   T1 = T[1]
+   S = SYMBOLS(T1)
+   S1 = SYMBOL(S[1])
+   N1 = S1.NAME
+   //print "Name1 = "; n1
+
+// Then, do it the indirect/dereferenced way
+
+   X[1] = "TABLES"
+   X[2] = "SYMBOL"
+   N2 = X[2](SYMBOLS(X[1]()[1])[1]).NAME
+   //print "Name2 = "; n2
+   
+   IF N1 <> N2 THEN RETURN 1
+   RETURN 0
+
+program test$functions4
+// Test for locale- and language- sensitive functions.  In general, these
+// are controlled by the SYS$LANGUAGE variable which is initialized to the
+// current process's locale code.  It can be explicitly set to any locale
+// code as needed; this test must be sure to set it back when done!
+
+    x = sys$language
+    sys$language = "FR"
+    if spell( 1234 ) <> "mille deux cent trente-quatre" then sys$language = x : return 101
+    sys$language = x
+    if spell( 1234, "FR" ) <> "mille deux cent trente-quatre" then return 102
+    if spell( 1234, "EN" ) <> "one thousand two hundred thirty four" then return 103
+    
+    sys$language = "FR"
+    if message("VERB","HERB") <> "Commande non reconnue, HERB" then sys$language = x : return 201
+    sys$language = "EN"
+    if message("VERB","HERB") <> "Unrecognized verb HERB" then sys$language = x : return 202
+    
+	sys$language = "ZZ"
+	if message("VERB","HERB") <> "Unrecognized verb HERB" then sys$language = x : return 203
+
+// This will trgger a LANGUAGE error fault.  Make sure we catch it cleanly.
+    on language then goto handler
+    if spell( 1234, "ZZ" ) <> "NOT SUPPORTED IN LANGUAGE(ZZ)" then return 104
+ 
+handler:
+    if sys$status.code <> "LANGUAGE" then return 301
+    if sys$status.parm <> "ZZ" then return 302
+    
+    sys$language = x
+    
+    return 0
+
+program test$functions5
+// Test program-as-function call.  Also tests parameter type coercion
+// and return type coercion in the program declaration statement.
+
+   x = test$$functions5(3.2) 
+   if type(x) <> "STRING" then return 100
+   if x <> "103" then return x
+   return 0
+
+program test$$functions5(integer v) returns string
+   if type(v) <> "INTEGER" then return 101
+   if v <> 3 then return 102
+   return 103
+
+ 1000           PROGRAM TEST$FUNCTIONS6
+ 1010           // Test GETBITS and SETBITS
+ 1020           // String tests
+ 1030           LET X = "---"
+ 1040           LET X = SETBITS( X, 65, 0, 8 )
+ 1050           LET X = SETBITS( X, 66, 8, 8 )
+ 1060           LET X = SETBITS( X, 67, 16, 8 )
+ 1080           IF X <> "ABC" THEN RETURN 101
+ 1090           LET Y = SETBITS( X, 0, 4, 4 )
+ 1100           IF Y <> "@BC" THEN RETURN 102
+ 1110           IF GETBITS( Y, 0, 16 ) <> 16450 THEN RETURN 103
+ 2000           // Integer tests
+ 2010           LET Z = 0
+ 2020           LET Z = SETBITS( Z, 5, 8, 8 )
+ 2030           IF HEXADECIMAL( Z ) <> "50000" THEN RETURN 201
+ 2040           LET Z = SETBITS( Z, 1, 2, 1 )
+ 2050           IF Z <> 537198592 THEN RETURN 202
+ 2060           IF GETBITS( Z, 2, 1 ) <> 1 THEN RETURN 301
+ 2070           RETURN 0
+
+ 1000           PROGRAM TEST$GOTO1
+ 1010           // Test of label resolution logic
+ 1011           // NOTE, this program must not be renumbered!
+ 1015           LET X=101
+ 1020           GOTO 1030
+ 1025           LET X=999
+ 1030           IF X<>101 THEN RETURN 101
+ 1040           LET X=102
+ 1050           LET Y=1080
+ 1060           GOTO USING(Y)
+ 1070           LET X=998
+ 1080 K1:       
+ 1090           IF X<>102 THEN RETURN 102
+ 1100           LET X=103
+ 1110           LET Y="K2"
+ 1120           GOTO USING(Y)
+ 1130           LET X=997
+ 1140 K2:       IF X<>103 THEN RETURN 103
+ 1200           LET Y=5555
+ 1210           ON ERROR THEN GOSUB K3
+ 1220           LET X=104
+ 1230           GOTO USING(Y)
+ 1250           IF X=104 THEN RETURN 104
+ 1260           IF X<>105 THEN RETURN 105
+ 1270           RETURN 0
+ 1300 K3:       
+ 1310           LET X=105
+ 1500           RETURN
+ 
+program test$gosub1
+// Test of GOSUB
+	
+	x = 1
+	gosub test
+	x = x + 1
+	gosub test
+	x = x + 1
+	
+	if x <> 7 then return x
+	return 0
+
+test:
+	x = x * 2
+	return
+
+
+program test$if1
+// IF test, to make sure IF..THEN and IF..THEN..ELSE work
+
+	x = 1
+	
+	if x=1 then y = 2 else y = 3
+	if y <> 2 then return 1
+	if x=2 then y = 2 else y = 3
+	if y <> 3 then return 2
+	if x<> 1 then return 3
+	if x = 1 then return 0
+	
+	return 0
+	
+program test$if2
+// Test for multi-line IF - ELSE - END IF
+
+    x = 1
+    y = 101
+    
+    if x then
+       y = 0
+    else
+       y = 102
+    end if
+    if y <> 0 then return y
+    
+    y = 201
+    if x then
+       if x = 1 then
+          y = 0
+       end if
+    else
+       y = 202
+    end if
+    if y <> 0 then return y
+    
+    
+    y = 301
+    if not x then
+       if x = 1 then
+          y = 302
+       end if
+    else
+       y = 0
+    end if
+    if y <> 0 then return y
+    
+    return 0
+
+program test$increment1
+// Test of pre- and post- increment and decrement
+
+    x = [ "Tom", "Mary", "Sarah" ]
+    n = 1
+    
+    if x [n++] <> "Tom" then return 101
+    if n <> 2 then return 102
+    
+    if x [ n--] <> "Mary" then return 103
+    if n <> 1 then return 104
+    
+    if x[++n] <> "Mary" then return 104
+    if n <> 2 then return 105
+    
+    if x[--n] <> "Tom" then return 106
+    if n <> 1 then return 107
+    
+    n = 0
+    do while n < 3
+       y = x[++n]
+    loop
+    if y <> "Sarah" then return 108
+    if n <> 3 then return 109
+    
+    return 0
+    
+    
+program test$informat1
+// Test basic INFORMAT statement and INPUT() function
+
+	informat fmt as integer(4), skip(2), integer(1)
+	if input(fmt, "   5  3" ) <> [5,3] then return 101
+	
+
+	informat fmt as integer(*), skip("."), integer(*)
+	if input(fmt, "3  .55" ) <> [3, 55] then return 201
+	if input(fmt, "3  . 55" ) <> [3, 55] then return 202
+	if input(fmt, "3. 55" ) <> [3, 55] then return 203
+	if input(fmt, " 3.55" ) <> [3, 55] then return 204
+	
+	return 0
+
+program test$input1
+//  Test of simple LINE INPUT operations from a file
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+    open file "jbasic_test.txt" for output as #1
+    x = "This is a test line of text"
+    print #1, x; " 1"
+    print #1, x; " 2"
+    close #1
+    
+    open input file "jbasic_test.txt" as #1
+    line input #1, x1
+    if x1 <> x + " 1" then return 101
+    line input #1, x2
+    if x2 <> x + " 2" then return 102
+    if not eof(1) then return 103
+    kill #1
+    return 0
+
+program test$input2
+// Test of simple input operations from a file.
+
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+    open file "jbasic_test.txt" for output as #1
+    print #1, "1 3.5 "; quote("Tom")
+    print #1, "2 7.0 "; quote("Sue")
+    close #1
+    
+    open input file "jbasic_test.txt" as #1
+    if eof(1) then return 101
+    input #1, a, b
+    if a <> 1 then return 102
+    if b <> 3.5 then return 103
+    if eof(1) then return 104
+    input #1, c
+    if c <> "Tom" then return 105
+    if eof(1) then return 106
+    input #1, a
+    if a <> 2 then return 201
+    if type(A) <> "INTEGER" then return 202
+    input #1, b, c
+    if b <> 7.0 then return 203
+    if c <> "Sue" then return 204
+    if not eof(1) then return 205
+    
+    kill #1
+    return 0
+
+program test$input3
+//  Test of BY NAME functionality
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	open output file "jbasic_test.txt" as #3
+	print #3, "Y=3, X="; quote("Tom");", z=false"
+	close #3
+	
+//  This form copies named values to x and y, and 
+//  puts any unexpected values in foo
+
+	open input file "jbasic_test.txt" as #4
+	input #4, by name(x,y) unexpected as foo
+	if y <> 3 then return 101
+	if x <> "Tom" then return 102
+	if foo <> {Z:false} then return 103
+	if not eof(4) then return 104
+	rewind #4
+
+// This form accepts any named parameters into foo as a record
+// There are two syntaxes with comparable semantic effect.
+
+	input #4, by name as foo
+	if foo <> { X:"Tom", y:3, z:false} then return 201
+	rewind #4
+	input #4, foo by name
+	if foo <> { X:"Tom", y:3, z:false} then return 202
+	kill #4
+	return 0
+
+ 1000           PROGRAM TEST$INPUT4
+ 1010           // Version: 1.0 test mixed INPUT operations
+ 1020           // Date:    Fri Aug 21 11:08:17 EDT 2009
+ 1030           // Author:  cole
+ 1040           OPEN FILE "data.txt" FOR OUTPUT AS # 1
+ 1050           PRINT # 1, 33.3, XML( [ 1,  { A: 3 } ] ), 44.4
+ 1060           CLOSE # 1
+ 1070           OPEN FILE "data.txt" FOR INPUT AS # 1
+ 1080           INPUT # 1, A
+ 1090           INPUT # 1, B AS XML
+ 1100           INPUT # 1, C
+ 1110           KILL # 1
+ 1120           IF A <> 33.3 THEN RETURN 101
+ 1130           IF B <> [ 1,  { A: 3 } ] THEN RETURN 102
+ 1140           IF C <> 44.4 THEN RETURN 103
+ 1150           RETURN 0	
+program test$jobj1
+//  Test of Java object interface
+    if !permission("JAVA") then print "Test skipped due to lack of permissions." : RETURN 0
+
+    // Sending and receiving simple types using a Java StringBuffer
+    // with a parameter on the constructor of a String.  In the case
+    // of a StringBuffer, this becomes the first item in the buffer.
+    
+	x = new("java.lang.StringBuffer", "This ")
+	call x->append("and ")
+	call x->append("that.")
+	if x->tostring() <> "This and that." then return 101
+
+    // Receiving an array back from an object using a Java Vector
+	x = new("java.util.Vector")
+	call x->add("Tom")
+	call x->add("Mary")
+	call x->add("Sarah")
+	if x->toarray() <> ["Tom", "Mary", "Sarah"] then return 201
+	
+	// Receiving objects back for further dereference. using Java TreeMap
+	LET X = NEW( "java.util.TreeMap" )
+    CALL X->PUT( "Tom", "Cole" )
+    CALL X->PUT( "Tony", "Gorf" )
+    if X->KEYSET( )->TOARRAY( ) <> ["Tom", "Tony"] then return 301
+    if X->VALUES( )->TOARRAY( ) <> ["Cole", "Gorf"] then return 302
+	
+	return 0
+	
+	
+program test$jobj2
+//  Test of Java object interface. This is the same as JOBJ1 but depends
+//  on modifying the SYS$PACKAGES list using the SET PACKAGE statement
+//  to define packages to search to resolve partial class names.
+//
+//  This also tests the ability to restore the package list to the place
+//  it was before adding new packages.  So if you have added packages 
+//  using SET PACKAGE before running this test, they will be removed
+//  when this test runs
+    if !permission("JAVA") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	set package = ["java.lang", "java.util"]
+	
+    // Sending and receiving simple types using a Java StringBuffer
+    // with a parameter on the constructor of a String.  In the case
+    // of a StringBuffer, this becomes the first item in the buffer.
+    
+	x = new("StringBuffer", "This ")
+	call x->append("and ")
+	call x->append("that.")
+	if x->tostring() <> "This and that." then return 101
+
+    // Receiving an array back from an object using a Java Vector
+	x = new("Vector")
+	call x->add("Tom")
+	call x->add("Mary")
+	call x->add("Sarah")
+	if x->toarray() <> ["Tom", "Mary", "Sarah"] then return 201
+	
+	// Receiving objects back for further dereference. using Java TreeMap
+	LET X = NEW( "TreeMap" )
+    CALL X->PUT( "Tom", "Cole" )
+    CALL X->PUT( "Tony", "Gorf" )
+    if X->KEYSET( )->TOARRAY( ) <> ["Tom", "Tony"] then return 301
+    if X->VALUES( )->TOARRAY( ) <> ["Cole", "Gorf"] then return 302
+	
+	set nopackage
+	
+	return 0
+
+PROGRAM test$lock1
+// Test of lock functions and queues to synchronize
+// two threads.  Sets up two threads to run simultaneously
+// and uses a LOCK to control a critical region where a
+// variable is incremented.  The lock ensures that only
+// one thread at a time will execute the critical code
+// region.
+    if !permission("THREADS") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	LET TEST_COUNT / ROOT / = 0
+    OPEN QUEUE "COUNT_Q" AS # 1
+    
+    // We have to do this to be sure WE own the lock,
+    // by virtue of first creating it.  Otherwise, it
+    // might be created first by the child thread, and
+    // while thread deletion will ultimately free up
+    // ownership of the lock, we might get to the CLEAR
+    // before the other thread exits, creating an ownership
+    // problem.
+    //
+    // Note that LOCK CREATE does not hold the lock, only
+    // creates it.  But if the lock already exists, this
+    // will stall out until the lock is available.
+    
+    LOCK CREATE COUNT_L
+    
+    CALL TEST$$LOCK1( ) AS THREAD(THREADID)
+    FOR I = 1 TO 10
+       LOCK COUNT_L
+       LET TEST_COUNT = TEST_COUNT + 1
+       UNLOCK COUNT_L
+    NEXT I
+  
+    // Waiting for this input helps us know that the
+    // thread has finished.
+    
+    LINE INPUT # 1, FLAG
+    CLOSE # 1
+    
+    IF TEST_COUNT <> 20 THEN RETURN 101
+
+    CLEAR LOCK COUNT_L
+    CLEAR TEST_COUNT
+    SLEEP 0.25
+    CLEAR THREADS
+    RETURN 0
+
+PROGRAM TEST$$LOCK1
+// Thread run from TEST$LOCK1, which increments the variable
+// TEST_COUNT at the same time as the calling program, requiring
+// a LOCK to define the critical region.  Also uses a QUEUE to
+// handle synchronization
+
+    OPEN QUEUE "COUNT_Q" AS # 2
+    FOR I = 1 TO 10
+        LOCK COUNT_L
+        LET TEST_COUNT = TEST_COUNT + 1
+        UNLOCK COUNT_L
+    NEXT I
+    PRINT #2, "DONE"
+    CLOSE #2
+	RETURN
+
+PROGRAM TEST$MATH1
+// Test of math verbs
+
+    XX = 10
+    ADD 2.5 TO XX
+    IF XX <> 12.5 THEN RETURN 101
+    SUBTRACT 3.5 FROM XX
+    IF XX <> 9 THEN RETURN 102
+    MULTIPLY XX BY 2
+    IF XX <> 18 THEN RETURN 103
+    DIVIDE XX BY 6
+    IF XX <> 3 THEN RETURN 104
+    
+    XX = "Tom"
+    MULTIPLY XX BY 3
+    IF XX <> "TomTomTom" THEN RETURN 105
+    SUBTRACT "omTom" FROM XX
+    IF XX <> "TTom" THEN RETURN 106
+    
+    TABLE XX AS INTEGER ID, STRING NAME
+    ADD [101, "TOM"] TO XX
+    IF XX.ID <> [101] THEN RETURN 201
+    IF XX.NAME <> ["TOM"] THEN RETURN 202
+    IF XX[1] <> [101, "TOM"] THEN RETURN 203
+    
+    RETURN 0  
+
+PROGRAM TEST$MATH2
+// Test pre- versus post-increment semantics.  This
+// is relevant for both conventional expressions and
+// also for load/store operations like ADD, DIVIDE, etc.
+// which load a value and store an update, and don't 
+// do the increments until after the store is complete.
+
+    A = [1,2,3,4,5]
+    B = 3
+    
+    // Key is that the increment takes place after the
+    // array dereference in this case, so we use A[3]+4
+    IF A[B++] + B <> 7 THEN RETURN 101
+    
+    // Here, the increment happens before the dereference,
+    // so this is A[5]+5
+    IF A[++B] + B <> 10 THEN RETURN 102
+    
+    A=[1,2,3,4,5]
+    B = 4
+    DIVIDE A[B++] BY 2.5
+    IF A <> [1,2,3,1.6,5] THEN RETURN 201
+    IF B <> 5 THEN RETURN 202
+    
+    A = [1,2,3,4,5]
+    B = 3
+    MULTIPLY A[B++] BY 3
+    if A <> [1,2,9,4,5] then return 203
+    IF B <> 4 THEN RETURN 204
+ 
+    A = [1,2,3,4,5]
+    B = 3
+    SUBTRACT 1 FROM A[B++]
+    if A <> [1,2,2,4,5] then return 203
+    IF B <> 4 THEN RETURN 204
+    
+    A = [1,2,3,4,5]
+    B = 3
+    ADD 10 TO A[--B]
+    IF A <> [1,12,3,4,5] THEN RETURN 301
+    IF B <> 2 THEN RETURN 302
+    
+    A = [11,12,13,14,15]
+    B = 3
+    SUBTRACT 10 FROM A[--B]
+    IF A <> [11,2,13,14,15] THEN RETURN 301
+    IF B <> 2 THEN RETURN 302
+
+    B = 4
+    MULTIPLY A[--B] BY 2
+    IF A <> [11,2,26,14,15] THEN RETURN 303
+    IF B <> 3 THEN RETURN 304
+    
+    B = 6
+    DIVIDE A[--B] BY 3
+    IF A <> [11,2,26,14,5] THEN RETURN 305
+    IF B <> 5 THEN RETURN 306
+
+    RETURN 0
+
+program test$mid1
+//  Test of MID$() function as well as post-increments
+    LET A="TOM COLE"
+    LET B=4
+    MID$(A,B,B+2)="XX"
+    IF A<>"TOMXXLE" THEN RETURN 101
+    IF B<>4 THEN RETURN 102
+    LET B=4
+    MID$(A,B++,B+2)="YY"
+    IF A<>"TOMYYE" THEN RETURN 201
+    IF B<>5 THEN RETURN 202
+    LET A="TOM COLE"
+    LET B=4
+    MID$(A,--B,B+2)="ZZ"
+    IF A<>"TOZZOLE" THEN RETURN 301
+    IF B<>3 THEN RETURN 302
+    RETURN 0    
+
+ 1000           PROGRAM TEST$OPTIMIZER1
+ 1010           // Test of conditional branches to validate optimizer cases
+ 1020           LET ZERO = 0
+ 1030           LET ONE = 1
+ 1040           LET X = 1
+ 1050           LET F = 0
+ 1060           IF X = ONE THEN F = 1
+ 1070           IF ! F THEN RETURN 101
+ 1080           IF X <> ONE THEN F = 0
+ 1090           IF ! F THEN RETURN 102
+ 1100           IF NOT X = ZERO THEN F = 0
+ 1110           IF F <> 0 THEN RETURN 103
+ 1120           IF NOT X - 1 THEN F = 1
+ 1130           IF F = 0 THEN RETURN 104
+ 2000           RETURN 0
+program test$pad1
+//	Test of PAD function
+
+	rc = 0
+	if pad("ABC",  5 ) <> "ABC  " then rc = 1
+	if pad("ABC", -5 ) <> "  ABC" then rc = 2
+	if pad("ABC",  0 ) <> ""      then rc = 3
+	if pad("ABC",  2 ) <> "AB"    then rc = 4
+	if pad("ABC", -2 ) <> "BC"    then rc = 5
+	return rc
+	
+program test$record1
+// Test of RECORD semantics.  Should be able to
+// define record constant, access record members,
+// format a record, and add a field to a record
+
+	x = { name: "Sue", age: 3 }
+	if x.name <> "Sue" then return 1
+	if x.age <> 3 then return 2
+	if format(x) <> "{ AGE: 3, NAME: " + quote("Sue") + " }" then return 3
+	x.gender = "M"
+	if format(x) <> "{ AGE: 3, GENDER: " + quote("M") + ", NAME: " + quote("Sue") + " }" then return 4
+
+	return 0
+
+program test$record2
+
+    x = { name: "Billy", age:33 }
+    y = { name: "Cindy", age:31 }
+    z.husband = x
+    z.wife = y
+    
+    if z.husband.name <> "Billy" then return 101
+    if z.wife.age <> 31 then return 102
+    return 0
+
+program test$record3
+	// You can use array notation to index a record as
+	// well.  This lets you have a variable that defines
+	// what part of the record to access.
+
+	x = { name: "Tom", age: 47 }
+	if x.name <> "Tom" then return 101
+	if x["name"] <> "Tom" then return 102
+	if x["age"] <> 47 then return 103
+
+	// Because you can use array notation, you can 
+	// also use multi-dimensional array notation.
+		
+	x = x + { key: [111, 222, 333] }
+	m = "KEY"
+	
+	if x[m, 2] <> 222 then return 201
+	if x[m][3] <> 333 then return 202
+	
+	xx = { key: { base:101, type:"integer"}}
+	if xx[m, "type"] <> "integer" then return 203
+	if xx[m]["base"] <> 101 then return 204
+	
+	return 0
+
+program test$record4
+// Addition and subtraction with records
+
+    x = { name: "Tom", age:48}
+    if x-"AGE" <> {name:"Tom"} then return 101
+    if x-"NAME" <> {age:48} then return 102
+    
+    if x + { HUMAN:TRUE} <> { age:48, name:"Tom", human:true} then return 103
+    
+    return 0
+    
+    
+
+program test$sort1
+// Test of SORT with integers
+
+    x[1] = 5
+    x[2] = 0
+    x[3] = 3
+    x[4] = 9
+    
+    sort x
+    if x[1] <> 0 then return 1
+    if x[2] <> 3 then return 2
+    if x[3] <> 5 then return 3
+    if x[4] <> 9 then return 5
+    
+    if length(x) <> 4 then return 99
+    return 0
+
+
+program test$sort2
+// Test of SORT with strings
+
+    x[1] = "gamma"
+    x[2] = "beta"
+    x[3] = "omega"
+    x[4] = "alpha"
+    
+    sort x
+    if x[1] <> "alpha" then return 1
+    if x[2] <> "beta" then return 2
+    if x[3] <> "gamma" then return 3
+    if x[4] <> "omega" then return 5
+    
+    if length(x) <> 4 then return 99
+    return 0
+
+program test$sort3
+// Test of SORT function
+
+    x[1] = 5
+    x[2] = 0
+    x[3] = 3
+    x[4] = 9
+    
+    y = sort(x)
+    if y[1] <> 0 then return 1
+    if y[2] <> 3 then return 2
+    if y[3] <> 5 then return 3
+    if y[4] <> 9 then return 5
+    
+    if length(y) <> 4 then return 99
+    return 0
+
+program test$sort4
+// Test of SORT on records
+
+	x[1] = { name: "Dave", age:33 }
+	x[2] = { name: "Tammy", age: 28 }
+	x[3] = { name: "Sue", age:44 }
+	
+	sort x by name
+	m = x[1]
+	if m.name <> "Dave" then return 1
+	if m.age <> 33      then return 2
+	m = x[2]
+	if m.name <> "Sue" then return 3
+	
+	return 0
+ 1000           PROGRAM TEST$SQL1
+ 1010           // Version: 1.0 Basic SELECT
+ 1020           // Date:    Fri Apr 22 12:46:01 EDT 2011
+ 1030           // Author:  tom
+ 1040           TABLE FAMILY AS STRING NAME, INTEGER ID, INTEGER AGE
+ 1050           ADD[ "Tom", 101, 51 ] TO FAMILY
+ 1060           ADD[ "Mary", 102, 50 ] TO FAMILY
+ 1070           ADD[ "Chelsea", 103, 18 ] TO FAMILY
+ 1080           ADD[ "Sarah", 104, 16 ] TO FAMILY
+ 1100           LET R = SQL( "select name from family where age < 21 order by name" )
+ 1130           IF R[ "NAME" ] <> ["Chelsea", "Sarah"] then return 101
+ 1140           LET R = SQL( "select name from family where age < 21 order by age" )
+ 1150           IF R[ "NAME" ] <> ["Sarah", "Chelsea"] then return 102
+ 1160           RETURN 0
+ 
+ 1000           PROGRAM TEST$SQL2
+ 1010           // Version: 1.0 INSERT and INSERT...SELECT
+ 1020           // Date:    Wed May 11 15:08:01 EDT 2011
+ 1030           // Author:  tom
+ 1040           CREATE TABLE T1( NAME CHAR, AGE INTEGER )
+ 1050           INSERT INTO T1 VALUES( "Tom", 51 )
+ 1060           INSERT INTO T1 VALUES( "Mary", 50 )
+ 1070           CREATE TABLE T2( NAME CHAR, ROLE CHAR, AGE INTEGER )
+ 1080           INSERT INTO T2 VALUES( "Chelsea", "daughter", 18 )
+ 1090           INSERT INTO T2 VALUES( "Sarah", "daughter", 16 )
+ 1100           INSERT INTO T1 SELECT NAME, AGE FROM T2
+ 1110           IF T1[ "AGE" ] <> [ 51, 50, 18, 16 ] THEN RETURN 101
+ 1120           IF T1[ "NAME" ] <> [ "Tom", "Mary", "Chelsea", "Sarah" ] THEN RETURN 102
+ 1130           RETURN 0
+
+ 1000           PROGRAM TEST$SQL3
+ 1010           // Version: 1.0 COUNT and DISTINCT
+ 1020           // Date:    Wed May 11 16:39:22 EDT 2011
+ 1030           // Author:  tom
+ 1040           CREATE TABLE FAMILY( NAME CHAR, AGE INTEGER )
+ 1050           INSERT INTO FAMILY VALUES( "Tom", 51 )
+ 1060           INSERT INTO FAMILY VALUES( "Mary", 51 )
+ 1070           INSERT INTO FAMILY VALUES( "Chelseas", 18 )
+ 1080           LET N = SQL( "select count(age) from family" )
+ 1090           IF N <> 3 THEN RETURN 101
+ 1100           LET N = SQL( "select count( distinct age) from family" )
+ 1110           IF N <> 2 THEN RETURN 102
+ 1120           LET R = SQL( "select distinct age from family" )
+ 1130           IF R[ "AGE" ] <> [ 51, 18 ] THEN RETURN 103
+ 1140           RETURN 0
+ 
+ 1000           PROGRAM TEST$SQL4
+ 1010           // Version: 1.0 JOIN test
+ 1020           // Date:    Wed May 18 13:46:11 EDT 2011
+ 1030           // Author:  tom
+ 1040           CREATE TABLE T1( ID INTEGER, FIRST CHAR )
+ 1050           INSERT INTO T1 VALUES( 101, "Tom" )
+ 1060           INSERT INTO T1 VALUES( 102, "Mary" )
+ 1070           INSERT INTO T1 VALUES( 201, "Tony" )
+ 1080           CREATE TABLE T2( ID INTEGER, LAST CHAR )
+ 1090           INSERT INTO T2 VALUES( 102, "Cole" )
+ 1100           INSERT INTO T2 VALUES( 201, "Tingen" )
+ 1110           INSERT INTO T2 VALUES( 101, "Cole" )
+ 1120           LET R = SQL( "SELECT FIRST, LAST FROM T1 JOIN T2 ON T1.ID = T2.ID ORDER BY LAST, FIRST" )
+ 1130           IF R[ "FIRST" ] <> [ "Mary", "Tom", "Tony" ] THEN RETURN 101
+ 1140           IF R[ "LAST" ] <> [ "Cole", "Cole", "Tingen" ] THEN RETURN 102
+ 1150           RETURN 0
+ 
+  100           PROGRAM TEST$SUB1
+  110           // Version: 1.0
+  120           // Date:    Wed Mar 11 11:02:07 EDT 2009
+  130           // Author:  cole
+  135           // Test calling SUB from in a loop (regression)
+  140           LET SUM = 0
+  150           FOR I = 1 TO 10
+  160             LET SUM = SUM + LSUB( I )
+  170           NEXT I
+  180           IF SUM <> 275 THEN RETURN 100
+  190           RETURN 0
+  200           SUB LSUB( INTEGER N )
+  210           RETURN N * 5
+  
+ 1000           PROGRAM TEST$SUB2
+ 1010           // Test use of CALL to a SUB, and handling of
+ 1020           // properly scoped variables.
+ 1030           
+ 1040           LET RC = 0
+ 1050           LET X = "B"
+ 1060           CALL LOCSUB( "A", 3 )
+ 1070           IF RC <> 0 THEN RETURN RC
+ 1080           
+ 1090           CALL LOCSUB( X, 3 )
+ 1100           IF RC <> 101 THEN RETURN 201
+ 1110           
+ 1120           RETURN 0
+ 1130           
+ 1140           SUB LOCSUB( X, Y )
+ 1150           IF X <> "A" THEN RC < PARENT >= 101: RETURN
+ 1160           IF Y <> 3 THEN RC < PARENT >= 102: RETURN
+ 1170           RETURN
+  
+  100           PROGRAM TEST$THREAD1
+  110           // Test of threads and queues
+  115          IF !permission("THREADS") then print "Test skipped due to lack of permissions." : RETURN 0
+  120           // There is no way to guarantee that both threads get started
+  130           // right away.  So to be sure that the sender doesn't complete
+  140           // before the receiver starts, let's make sure that the queue
+  150           // has a lifetime beyond just the threads, by opening it ourselves.
+  160           
+  170           OPEN QUEUE "msgq" AS F
+  175           OPEN QUEUE "WAITQ" AS W
+  180           
+  190           // Now start the threads.  We start the receiver first because
+  200           // it is likely that the sender would otherwise finish sending
+  210           // all its messages before the receiver got going, and would be
+  220           // a disappointing demonstration of parallelism.
+  230           
+  240           CALL TEST$$THREADSUB1( "MSGQ" ) AS THREAD(T1)
+  250           CALL TEST$$THREADSUB2( "MSGQ" ) AS THREAD(T2)
+  260           
+  350           
+  360           // At this point, the threads better be running and we can
+  370           // give up our interest in the queue, so it will be deleted
+  380           // when the threads release it. Wait a moment to be sure.
+  385           SLEEP 0.1
+  390           CLOSE F
+  400           LINE INPUT FILE W, S
+  405           CLOSE W
+  410           IF S <> 210 THEN RETURN 100 + S
+  412           SLEEP .1
+  415           CLEAR THREADS
+  420           RETURN 0
+          
+  100           PROGRAM TEST$$THREADSUB1( Q )
+  110           OPEN QUEUE Q AS X
+  130           FOR I = 1 TO 20
+  150             PRINT FILE X, I
+  160           NEXT I
+  165           PRINT FILE X, "END"
+  170           CLOSE X
+  180           RETURN
+  
+  100           PROGRAM TEST$$THREADSUB2( Q )
+  110           OPEN QUEUE Q AS X
+  120           T = 0
+  130 NEXTONE:  
+  140           LINE INPUT FILE X, Y
+  160           IF Y = "END" THEN GOTO DONE
+  165           T = T + NUMBER(Y)
+  170           GOTO NEXTONE
+  180 DONE:     
+  190           CLOSE X
+  195           OPEN QUEUE "WAITQ" AS D
+  198           PRINT FILE D, T
+  200           CLOSE D
+  210           RETURN          
+
+  100           PROGRAM TEST$TABLE1
+  110           // Test of basic RecordStreamValue operations
+  120           
+  130           LET Y = [ { AGE: 49, ID: 101, NAME: "Mary" },  { AGE: 50, ID: 100, NAME: "Tom" } ]
+  140           TABLE NAMES AS INTEGER ID, STRING NAME
+  150           LET NAMES = NAMES + [ 103, "Bob" ]
+  160           LET NAMES = NAMES + [ 100, "Tom" ]
+  170           LET NAMES = NAMES + [ 102, "Susan" ]
+  180           LET NAMES = NAMES + [ 101, "Mary" ]
+  190           
+  200           TABLE AGES AS INTEGER ID, INTEGER AGE
+  210           LET AGES = AGES + [ 100, 50 ]
+  220           LET AGES = AGES + [ 102, 16 ]
+  230           LET AGES = AGES + [ 101, 49 ]
+  240           LET AGES = AGES + [ 103, 15 ]
+  250           LET X = SORT( JOIN( NAMES, AGES, "ID" ) WHERE( AGE > 21 ), "NAME" )
+  260           IF X <> Y THEN RETURN 101
+  270           RETURN 0
+
+  100           PROGRAM TEST$TABLE2
+  110           // Test of basic RecordStreamValue operations
+  115           // Adding rows using record notation instead of array notation.
+  120           
+  130           LET Y = [ { AGE: 49, ID: 101, NAME: "Mary" },  { AGE: 50, ID: 100, NAME: "Tom" } ]
+  140           TABLE NAMES AS INTEGER ID, STRING NAME
+  150           LET NAMES = NAMES + { name:"Bob", id:103}
+  160           LET NAMES = NAMES + { id: 100, name: "Tom" }
+  170           LET NAMES = NAMES + { id: 102, name: "Susan"}
+  180           LET NAMES = NAMES + { name: "Mary" , id:101}
+  190           
+  200           TABLE AGES AS INTEGER ID, INTEGER AGE
+  210           LET AGES = AGES + [ 100, 50 ]
+  220           LET AGES = AGES + [ 102, 16 ]
+  230           LET AGES = AGES + [ 101, 49 ]
+  240           LET AGES = AGES + [ 103, 15 ]
+  250           LET X = SORT( JOIN( NAMES, AGES, "ID" ) WHERE( AGE > 21 ), "NAME" )
+  260           IF X <> Y THEN RETURN 101
+  270           RETURN 0
+
+program test$table3
+//  Reading rows from a file
+
+	table f as string name, integer age
+	open output file "bdata.dat" as #1
+	print #1, "Tom 49"
+	print #1, "Sue 52"
+	close #1
+	
+	open input file "bdata.dat" as #2
+	do while not eof(2)
+	   input #2, row of f
+	loop
+	
+	kill #2
+	//print f
+	
+	x = [{name:"TOM", age:49}, {name:"SUE", age:52}]
+	if f <> x then return 101
+	return 0
+
+program test$table4
+//  Test of column extraction
+    table foo as integer id, string name
+    foo = foo + {id:100, name:"Sue"}
+    foo = foo + {id:101, name:"Bob"}
+    if foo.id <> [100,101] then return 101
+    if foo.name <> ["Sue", "Bob"] then return 102
+    if foo["NAME"] <> ["Sue", "Bob"] then return 103
+    if sort(foo,"NAME").name <> ["Bob", "Sue"] then return 104
+    return 0
+    
+program test$total1
+//	Test of TOTAL function
+
+	rc = 0
+	x = total(1,2,3,4)
+	if x <> 10 then rc = 1
+	
+	x = total(1)
+	if x <> 1 then rc = 2
+	
+	x = total("a","b","c")
+	if x <> "abc" then rc = 3
+	
+	return rc
+
+program test$types
+// Test the type compiler and checker
+
+    a = [1,3.3,"test"]
+    b = "number"
+    c = "[integer,integer]"
+    if not typechk(3, "integer") then return 100
+    if not typechk(3.3, "double") then return 101
+    if not typechk(3, b) then return 102
+    if not typechk(5., b) then return 103
+    if typechk("test",b) then return 200
+    if typechk([1], "number") then return 201
+    if not typechk([1,3.], "[integer,double]") then return 300
+    if not typechk([1,3], c) then return 301
+    if not typechk([1,"3"], "[integer, string]") then return 302
+    if not typechk({a:1}, "{a:integer}") then return 303
+    
+    // Explicit test of the type compiler
+    asm _prototype "{a:integer,b:string,c:[double,double]}", _stor "D"
+    if d <> {a:0,b:"",c:[0.0,0.0]} then return 400
+    
+    return 0
+    
+program test$using1
+//	Test of PRINT USING
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	fn = "jb_using.txt"
+	open file fn for output as uf
+	
+	print file uf, using "###.##", 3.5
+	print file uf, using "Answer is #", 5
+	print file uf, using "(##)", -5
+	print file uf, using "# # #", 1, 2, 3
+	close file uf
+	
+	rc = 0
+	open file fn for input as uf
+	line input file uf, xstr
+	if xstr <> "  3.50" then rc = 1
+	
+	line input file uf, xstr
+	if xstr <> "Answer is 5" then rc = 2
+	
+	line input file uf, xstr
+	if xstr <> "( 5)" then rc = 3
+	
+	line input file uf, xstr
+	if xstr <> "1 2 3" then rc = 4
+	
+	kill file uf
+	return rc
+
+    
+PROGRAM TEST$WHERE1
+// WHERE expressions, involving subsetting arrays of records
+// based on a boolean expression
+
+    table x as integer age, string name
+    x = x +  { AGE: 10, NAME: "Tom" } +  { AGE: 11, NAME: "Sue" } + { AGE: 12, NAME: "Bob" }
+    
+    Z = X WHERE( AGE >= 11 )
+    IF z <> [ { AGE: 11, NAME: "Sue" },  { AGE: 12, NAME: "Bob" } ] THEN RETURN 101
+    
+    LET Z = ( X WHERE name = "Bob" ) + { AGE: 49, NAME: "Mary" }
+    if z <> [ { AGE: 12, NAME: "Bob" }, { AGE: 49, NAME: "Mary" } ] then return 102
+    
+    if (x where _index_ < 2) <> [{ AGE: 10, NAME: "Tom" }] then return 103
+    
+    return 0
+ 
+program test$xml1
+//  Text XML handling of values
+
+    a1 = xml(3)
+    a2 = xmlparse(a1)
+    if type(a2) <> "INTEGER" then return 101
+    if a2 <> 3 then return 102
+    
+    a1 = xml("Test")
+    a2 = xmlparse(a1)
+    if type(a2) <> "STRING" then return 201
+    if a2 <> "Test" then return 202
+    
+    a1 = xml(3.5)
+    a2 = xmlparse(a1)
+    if type(a2) <> "DOUBLE" then return 301
+    if a2 <> 3.5 then return 302
+    
+    a1 = xml(1=3)
+    a2 = xmlparse(a1)
+    if type(a2) <> "BOOLEAN" then return 303
+    if a2 <> false then return 304
+    
+    a1 = xml([1,true,"BOB"])
+    a2 = xmlparse(a1)
+    if type(a2) <> "ARRAY" then return 401
+    if type(a2[1]) <> "INTEGER" then return 402
+    if type(a2[2]) <> "BOOLEAN" then return 403
+    if type(a2[3]) <> "STRING" then return 404
+    if a2 <> [1, true, "BOB"] then return 405
+    
+    a1 = xml( { age:48, name: ["Sue", "Smith"]})
+    a2 = xmlparse(a1)
+    if type(a2) <> "RECORD" then return 501
+    if type(a2.age) <> "INTEGER" then return 502
+    if a2.age <> 48 then return 503
+    if type(a2.name) <> "ARRAY" then return 504
+    if type(a2.name[1]) <> "STRING" then return 505
+    if a2.name[2] <> "Smith" then return 506
+    
+    a1 = "Test\nString of \"text\" to tab\tand parse"
+    a2 = xml(a1)
+    a3 = xmlparse(a2)
+    if a1 <> a3 then return 601
+    
+    return 0
+    
+program test$xml2
+// Test of INPUT .. AS XML, which reads XML strings and converts
+// them to values.  These can be intermixed with regular values.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+    x = { age:47, name:"Tom"}
+    f = "xml_test.xml"
+    open output file f as #1
+    print #1, 1234
+    print #1, xml(x)
+    print #1, 5678
+    close #1
+    
+    open input file f as #2
+    input #2, a, y as XML, b
+    close #2
+    
+    if y.age <> 47 then return 101
+    if y.name <> "Tom" then return 102
+    if a <> 1234 then return 201
+    if b <> 5678 then return 202
+    kill f
+    return 0
+
+program test$xml3
+//  Read and write multiple XML values from the file
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+    f = "xml_test.xml"
+    open output file f as #3
+    print #3, xml({first:1,last:99})
+    print #3, xml("Test")
+    print #3, xml(3.55)
+    close #3
+    
+    open input file f as #3
+    input #3, x1 as xml, x2 as xml, x3 as xml
+    
+    if x1 <> {first:1, last:99} then return 301
+    if x2 <> "Test" then return 302
+    if x3 <> 3.55 then return 303
+    if !eof(3) then return 304
+    close #3
+    
+ 	kill f
+ 	return 0
+
+program test$xml4
+// Should also be able to read RAW XML into the string variable, without the
+// attempt to convert it to a value.
+    if !permission("FILE_IO") then print "Test skipped due to lack of permissions." : RETURN 0
+
+	f = "xml_test.xml"
+	v = -38
+    open output file f as #1
+    print #1, xmlcomment()
+    print #1, xml(v)
+    close #1
+
+    open input file f as #1
+    input #1, x as raw xml
+    close #1
+    y = "<?XML VERSION=\"1.0\" ENCODING=\"UTF-8\"?>< JBASICVALUE>< INTEGER D=\"-38\"/></JBASICVALUE>"
+    if x <> y then return 301
+    if xmlparse(x) <> v then return 302
+    
+    kill f
+    return 0
+    
+	

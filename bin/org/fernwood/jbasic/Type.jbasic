@@ -1,0 +1,57 @@
+  100           VERB TYPE
+  110           // Version: 1.1
+  120           // Date:    Sun Nov 02 09:58:45 EST 2008
+  130           // Author:  cole
+  140           
+  150           // Add messages to the message database for this verb. These
+  160           // are handled as messages so that localization can be done
+  170           // and the command respond correctly to different locales.
+  180           
+  190           MESSAGE TYPE$FNF( EN ) "File \"[]\" does not exist"
+  200           MESSAGE TYPE$NOR( EN ) "File \"[]\" cannot opened for reading"
+  210           MESSAGE TYPE$DIR( EN ) "\"[]\" is a directory, not a file"
+  220           MESSAGE TYPE$USE( EN ) "Incorrect syntax; use TYPE \"filename\""
+  230           MESSAGE TYPE$ZED( EN ) "      <File is empty>"
+  232           MESSAGE TYPE$PERM(EN)  "You do not have permission to TYPE a file"
+  233 
+  235           IF NOT PERMISSION("FILE_IO") THEN SIGNAL TYPE$PERM : RETURN
+  240 
+  250           // There must be a single argument; the file name
+  260           IF LENGTH( $ARGS ) <> 1 THEN SIGNAL TYPE$USE: RETURN
+  270           LET T = TOKENIZE( $COMMAND_LINE )
+  280           IF T[ 1 ].KIND <> "STRING" THEN SIGNAL TYPE$USE: RETURN
+  290           
+  300           // If the file does not exist, then error.
+  310           LET FN = FILETYPE( T[ 1 ].SPELLING )
+  312           IF FN = {} THEN SIGNAL TYPE$FNF(T[1].SPELLING) : RETURN
+  320           LET FN = FN.PATH || FN.NAME
+  330           IF ! EXISTS( t[1].spelling ) THEN SIGNAL TYPE$FNF( t[1].spelling ): RETURN
+  340           
+  350           // The file must be readable, and not a directory
+  360           LET FDATA = FILETYPE( t[1].spelling )
+  370           IF ! FDATA.READ THEN SIGNAL TYPE$NOR( t[1].spelling ): RETURN
+  380           IF FDATA.DIRECTORY THEN SIGNAL TYPE$DIR( t[1].spelling ): RETURN
+  390           
+  400           // Print the full file name and get ready to read text
+  410           LET COUNT = 0
+  420           PRINT FDATA.PATH || FDATA.NAME
+  430           OPEN INPUT t[1].spelling AS LFILE
+  440           
+  450           // If there isn't anything in the file, just quit
+  460           IF EOF( LFILE ) THEN PRINT MESSAGE( "TYPE$ZED" ): GOTO DONE
+  470           
+  480           // Otherwise, read the file in a loop until done
+  490           DO
+  510             // Read the line of text
+  520             LINE INPUT FILE LFILE, LDATA
+  530             
+  540             // Output a formatted (right justified) line number
+  550             // and the line of text, then loop to get more.
+  560             LET COUNT = COUNT + 1
+  570             PRINT USING "####", COUNT;
+  580             PRINT ": "; LDATA
+  600           WHILE ! EOF( LFILE )
+  610  DONE:      
+  620           CLOSE FILE LFILE
+  625           CLEAR MESSAGE TYPE$  // IF all went well, clear away our message definitions
+  630           RETURN

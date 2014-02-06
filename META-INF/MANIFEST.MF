@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.6.1
+Created-By: 1.4.2-38 ("Apple Computer, Inc.")
+Main-Class: org.fernwood.jbasic.JBasic
+Specification-Title: JBasic
+Specification-Vendor: Forest Edge
+Specification-Version: 2.0
+Implementation-Title: JBasic
+Implementation-Vendor: Forest Edge
+Implementation-Vendor-Id: org.fernwood
+Implementation-Version: 2.9
+Copyright: 2010
+

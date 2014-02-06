@@ -1,0 +1,64 @@
+  100           VERB FILES
+  110           
+  120           //  FILE ["path"]
+  130           //
+  140           //  Implement the FILES command that lists files in a directory.
+  150           //  Uses the FILETYPES() function to return an array of arrays
+  160           //  about each file in the given path.  This information is
+  170           //  formatted for output to the user.
+  180           
+  190           IF NOT PERMISSION("DIR_IO") THEN PRINT MESSAGE("SANDBOX","DIR_IO"):RETURN
+  200           
+  210           ARRAY PATHLIST
+  220           LET HOME=SYS$HOME||PROPERTY("file.separator")
+  230           
+  240           //  Each item in the command line must be a quoted string that is a valid
+  250           //  directory path.  Shortcut of "." is permitted, as is using "~" as the
+  260           //  user's home directory as a prefix.
+  270           
+  290           FOR I=EACH ITEM OF TOKENIZE($COMMAND_LINE)
+  300             IF I.KIND="SPECIAL" THEN
+  301                IF I.SPELLING="," THEN CONTINUE LOOP
+  302                IF I.SPELLING="." THEN I.KIND="STRING"
+  305             END IF
+  310             IF I.KIND<>"STRING" THEN PRINT  "Usage:  FILES [\"path\" [, \"path\"]]":RETURN
+  320             LET F=I.SPELLING
+  330             IF LEFT(F,1)="~" THEN F =HOME||SUBSTRING(F,2)
+  340             LET FT=FILETYPE(F)
+  342             IF FT = {} THEN PRINT "Error: invalid directory path: "; F : RETURN
+  350             IF NOT FT.DIRECTORY THEN PRINT  "Error: invalid directory path: ";FT.PATH+FT.NAME:RETURN
+  360             ADD F TO PATHLIST
+  370           NEXT I
+  380           
+  390           IF LENGTH(PATHLIST)=0 THEN PATHLIST [1]="."
+  400           
+  410           SET PATHCOUNT TO 0
+  420           FOR PATH=EACH ITEM OF PATHLIST
+  430             ADD 1 TO PATHCOUNT
+  460             SET DIRDATA TO FILETYPES(PATH)
+  462             IF DIRDATA = {} THEN 
+  464               PRINT "Error: invalid directory path: "; PATH
+  466               RETURN
+  468             END IF
+  470             SET COUNT TO LENGTH(DIRDATA)
+  480             SET PRINTCOUNT TO 0
+  490             FOR I=1 TO COUNT
+  500               LET FILEDATA=DIRDATA[I]
+  510               IF NOT FILEDATA.HIDDEN THEN
+  520                 IF PRINTCOUNT=0 THEN
+  525                   IF PATHCOUNT>1 THEN PRINT
+  530                   PRINT  "Files in ";FILETYPE(PATH).PATH
+  535                 END IF
+  550                 LET NM=PAD(FILEDATA.NAME||(IF FILEDATA.DIRECTORY THEN "/" ELSE ""),32)
+  560                 PRINT  "    ";NM;"   ";DATE(FILEDATA.MODIFIED)
+  570                 ADD 1 TO PRINTCOUNT
+  580               END IF
+  590             NEXT I
+  600             LET FT=FILETYPE(PATH)
+  610             PRINT PRINTCOUNT;" file";IF PRINTCOUNT=1 THEN "" ELSE  "s"
+  620             IF PRINTCOUNT=0 THEN PRINT  " in ";FT.PATH;
+  630             PRINT
+  640           NEXT PATH
+  650           SET NEEDPROMPT
+  660           RETURN
+

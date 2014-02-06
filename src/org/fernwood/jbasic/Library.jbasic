@@ -1,0 +1,513 @@
+// THIS SOURCE FILE IS PART OF JBASIC, AN OPEN SOURCE PUBLICLY AVAILABLE
+// JAVA SOFTWARE PACKAGE HOSTED BY SOURCEFORGE.NET
+// 
+// THIS SOFTWARE IS PROVIDED VIA THE GNU PUBLIC LICENSE AND IS FREELY
+// AVAILABLE FOR ANY PURPOSE COMMERCIAL OR OTHERWISE AS LONG AS THE AUTHORSHIP
+// AND COPYRIGHT INFORMATION IS RETAINED INTACT AND APPROPRIATELY VISIBLE
+// TO THE END USER.
+// 
+// SEE THE PROJECT FILE AT HTTP://WWW.SOURCEFORGE.NET/PROJECTS/JBASIC FOR
+// MORE INFORMATION.
+// 
+// COPYRIGHT 2003-2011 BY TOM COLE, TOMCOLE@USERS.SF.NET
+//
+// NOTE THAT PROGRAM NAMES WITH A LEADING "$" CHARACTER ARE NOT NORMALLY
+// VISIBLE TO THE USER, BUT CAN STILL BE RUN.  SO PROGRAMS PUT HERE OF A
+//
+
+
+  100           PROGRAM $MAIN
+  110           
+  120           //	Default main program when JBasic runs.  If there are no
+  130           //  command line arguments, just run the "about" program
+  140           //  that puts up a banner and we're done.  Otherwise,
+  150           //	re-concatenate the arguments into a single command and
+  160           //  execute it.
+  170           
+  180           SET PROMPT = "BASIC> "
+  190           LET SYS$ALIASES/GLOBAL/ = {}
+  200           LET SYS$ALIASES[ "DIR" ] = "SHOW PROGRAMS"
+  210           LET SYS$ALIASES[ "BENCHMARK" ] = "TIME CALL $BENCHMARK"
+  220           LET SYS$ALIASES[ "?" ] = "PRINT"
+  230           
+  240           //  Map of function names, for compatibility with various
+  250           //	dialects of BASIC
+  260           //
+  270           //   Map  THIS    to  THIS
+  280           //        ------      ------
+  290           DATA      "TRM$",     "TRIM"
+  300           DATA      "ASC",      "ASCII"
+  310           DATA      "LEFT$",    "LEFT"
+  320           DATA      "RIGHT$",   "RIGHT"
+  330           DATA      "CHR$",     "CHARACTER"
+  340           DATA      "NUM",      "NUMBER"
+  350           DATA      "ACOS",     "ARCCOS"
+  360           DATA      "ASIN",     "ARCSIN"
+  370           DATA      "ATAN",     "ARCTAN"
+  380           DATA      "EVAL",     "EXPRESSION"
+  390           DATA      "FMT$",     "FORMAT"
+  400           DATA      "LOC",      "LOCATE"
+  410           DATA      "LOWER$",   "LOWERCASE"
+  420           DATA      "UPPER$",   "UPPERCASE"
+  430           DATA      "MEM",      "MEMORY"
+  440           DATA      "RND",      "RANDOM"
+  450           DATA      "SQR",      "SQRT"
+  460           DATA      "STR$",     "STRING"
+  470           DATA      "HEX$",     "HEXADECIMAL"
+  480           DATA      "OCT$",     "OCTAL"
+  490           LET SYS$FUNCTION_MAP/GLOBAL/ = []
+  500           LET FCOUNT = 0
+  510           DO WHILE( NOT EOD( ) )
+  520             LET FCOUNT = FCOUNT + 1
+  530             READ SYS$FUNCTION_MAP[ FCOUNT ].OLD, SYS$FUNCTION_MAP[ FCOUNT ].NEW
+  540           LOOP
+  550           
+  560           
+  570           // This has the effect of making the variable readonly
+  590           LET SYS$FUNCTION_MAP / READONLY / = SYS$FUNCTION_MAP
+  600           
+  610           IF LENGTH( SYS$INITCMD ) > 0 THEN RETURN
+  620           IF LEFT( SYS$MODE, 9 ) = "REMOTEPGM" THEN RETURN
+  630           
+  640           RUN $ABOUT
+  650           LET SYS$STARTUP_TIME = SECONDS( )
+  660           RETURN
+
+  100           PROGRAM $DUMPMESSAGES( STRING FN = "m.txt" )
+  110           
+  120           //  Create a text file containing the Java message code definitions.
+  130           
+  140           IF $MODE = "RUN" THEN FN = "m.txt"
+  150           OPEN FILE FN FOR OUTPUT AS MT
+  160           
+  170           FOR C = EACH OF SORT( MESSAGES( ) )
+  180             LET T = MESSAGE( C, "<parm>" )
+  190             IF LEFT( C, 1 ) = "*" THEN CX = SUBSTR( C, 2 ) ELSE CX = C
+  200             PRINT FILE MT, "/**"
+  210             PRINT FILE MT, " * Message: "; T
+  220             PRINT FILE MT, " */"
+  230             PRINT FILE MT, "public final static String "; CX; " = "; QUOTE( C ); "; "
+  240             PRINT FILE MT
+  250           NEXT C
+  260           CLOSE FILE MT
+  270           RETURN
+  280           
+  290     
+	
+  100           VERB DEAL
+  110           
+  120           LET COUNT = 5
+  130           IF LENGTH( $ARGS ) > 0 THEN
+  140             ON EXPRESSION THEN GOTO BADARG
+  150             LET COUNT = EXPRESSION( $COMMAND_LINE )
+  160           END IF
+  170           
+  180           LET CARDS = RANDOMLIST( 1, 52 )
+  190           
+  200           FOR I = 1 TO COUNT
+  210             PRINT CARD( CARDS[ I ] )
+  220           NEXT I
+  230           RETURN
+  240           
+  250 BADARG:   
+  260           PRINT "Invalid argument reflecting number of cards to deal."
+  270           RETURN
+  280           
+  290      
+
+
+  100           PROGRAM OBJECTTEST
+  110           
+  120           //	Rudimentary test programs to experiment with
+  130           //	"object" capabilities - really hierarchies of
+  140           //	records describing classes and containers.
+  150           
+  160           //	Create the object classes.  The class type
+  170           //	follows the CLASS keyword.  If the class is
+  180           //	a subclass, name the superclass after a colon,
+  190           //	such as the case of MANAGER:EMPLOYEE below.
+  200           //	Field variables which are to be automatically
+  210           //	declared in a class follow in parens.
+  220           
+  230           CLASS EMPLOYEE( SALARY AS DOUBLE )
+  240           CLASS MANAGER: EMPLOYEE( DEPT AS STRING )
+  250           CLASS DEPARTMENT( DNAME AS STRING )
+  260           
+  270           //	Create an instance of an object given a class
+  280           //	declaration.  This is a record so instance
+  290           //	variables are record member fields.
+  300           
+  310           LET ABC = NEW( DEPARTMENT )
+  320           LET ABC.DNAME = "ABC DEPT"
+  330           
+  340           //	Create a manager object, and indicate that it
+  350           //	is contained in the ABC object.  This creates
+  360           //	parent associations for field resolution,
+  370           //	tom->dname will locate the dname field in ABC.
+  380           
+  390           LET TOM = NEW( MANAGER ) OF ABC
+  400           LET TOM.NAME = "Tom"
+  410           LET TOM.SALARY = 30000
+  420           
+  430           //	Create a new employee object, and use the
+  440           //	container association to define employment.
+  450           //	Because container associations are recursive,
+  460           //	sue->dname is also ABC.
+  470           
+  480           LET SUE = NEW( EMPLOYEE ) OF TOM
+  490           LET SUE.NAME = "Sue"
+  500           LET SUE.SALARY = 12.00
+  510           
+  520           //	Call the pay method on each object. The method
+  530           //	name is found by looking for <class>$<method>
+  540           //	as a procedure name.  If not found, the search
+  550           //	continues using <superclass>$<method>
+  560           //	until a method is found or an error generated.
+  570           //	So tom->pay calls MANAGER$PAY but sue->pay
+  580           //	calls EMPLOYEE$PAY.
+  590           
+  600           PRINT "New SUE pay = "; SUE->PAY( 35 )
+  610           PRINT "New TOM pay = "; TOM->PAY( )
+  620           
+  630           //	Let's iterate over the list of objects again
+  640           //	and call the print function.  Because there
+  650           //	is no MANAGER$PRINT_PAY, both methods will
+  660           //	call the EMPLOYEE$PRINT_PAY method.
+  670           
+  680           LET DEPARTMENT.EMPLOYEES = [ TOM, SUE ]
+  690           
+  700           LET N = LENGTH( DEPARTMENT.EMPLOYEES )
+  710           FOR I = 1 TO N
+  720             LET EMP = DEPARTMENT.EMPLOYEES[ I ]
+  730             CALL EMP->PRINT_PAY
+  740           NEXT I
+  750           RETURN
+
+  100           PROGRAM EMPLOYEE$PRINT_PAY
+  110           
+  120           //	Print the pay information for any object, where
+  130           //	"this" is automatically defined to be the object
+  140           //	that invoked the method.  Note that this->dname
+  150           //	is not resolved from the "this" object, but is
+  160           //	acquired via the container association.
+  170           
+  180           PRINT THIS.NAME, FORMAT( THIS.PAY, "$####.##" ), THIS->DNAME
+  190           RETURN
+
+    
+  100           PROGRAM EMPLOYEE$PAY( HOURS = 40 )
+  110           LET THIS.PAY = THIS.SALARY * HOURS
+  120           RETURN THIS.PAY
+      
+  100           PROGRAM MANAGER$PAY
+  110           LET THIS.PAY = THIS.SALARY / 52.0
+  120           RETURN THIS.PAY
+  	
+  100           PROGRAM MARGIN( WIDTH = 80 )
+  110           LET DASH = ""
+  120           LET RULE = ""
+  130           FOR I = 0 TO WIDTH - 2
+  140             IF MOD( I, 10 ) = 0 THEN DASH = DASH + "+" ELSE DASH = DASH + "-"
+  150             IF MOD( I, 10 ) = 0 THEN RULE = RULE + ( I / 10 ) ELSE RULE = RULE + " "
+  160           NEXT I
+  170           PRINT DASH; "*"
+  180           PRINT RULE; "*"
+  190           
+  200           RETURN
+
+  100           PROGRAM $BENCHMARK( ITER = 100 )
+  110           
+  120           //	Program to spend time in compute mode.  Used to time the
+  130           //	build of JBasic and the effectiveness of the JVM/JIT/Runtime
+  140           
+  150           PRINT "Starting run at "; DATE( ); ", for "; ITER; " iterations."
+  160           LET BASE = SECONDS( )
+  170           
+  180           FOR I = 1 TO ITER
+  190             CALL $BENCHMARKSUB( I ) RETURNS X
+  200             LET Y = X * 3 + 5
+  210           NEXT I
+  220           
+  230           LET ELAPSED = SECONDS( ) - BASE
+  240           PRINT "Done at "; DATE( )
+  250           RETURN
+  260      
+
+  100           PROGRAM $BENCHMARKSUB( VAL )
+  110           LET S = "this is a test"
+  120           LET Y = PARSE( S, 2 )
+  130           IF Y = "is" THEN Y = "is not"
+  140           LET XPI = $PI_TEST( )
+  150           RETURN XPI
+
+
+  100           PROGRAM $FBTEST
+  110           // Version: 1.0
+  120           // Date:    Wed Sep 20 09:03:44 EDT 2006
+  130           // Author:  cole
+  140           //
+  150           // Test of JDBC interfaces.
+  160           //
+  170           // As written, this uses the Firebird/Jaybird database server and
+  180           // JDBC driver suite.  It also assumes there is a test directory
+  190           // called "c:\vulcantest" in which to write the database.  Change
+  200           // this test as you need to work on your platform!
+  210           //
+  220           // This illustrates JDBC interface features of JBasic
+  230           //
+  240           //	1. Create or add to SYS$DRIVERS to contain the name(s) of the
+  250           //	   driver classes that are to be used to handle JDBC work.  This
+  260           //	   is needed so the JDBC connection manager knows what to look for.
+  270           //
+  280           //  2. Create a driver-specific connection string, and use it as the
+  290           //	   filename in an OPEN statement, with type of DATABASE.
+  300           //
+  310           //	3. A PRINT to the database specifies a statement to prepare and
+  320           //	   execute.
+  330           //
+  340           //	4. A GET statement is used to read the result set data.
+  350           //
+  360           //  5. A GET with an explicit record specification (like a BINARY file)
+  370           //	   defines the fields to read from the result set, and what type they
+  380           //	   are expected to be.
+  390           //
+  400           //	        GET FILE FB, INTEGER ID, STRING NAME
+  410           //
+  420           //	   would require field names of ID and NAME in the database, and
+  430           //	   they would become local variables after the GET operation.  You
+  440           //	   can use the AS <record> clause to specify a record to store them
+  450           //	   in, and you can use the USING clause to specify a record withe
+  460           //	   the field information, just like a BINARY file.
+  470           //
+  480           //	6. You can also do a read without knowing in advance what the field
+  490           //	   names and types are, by just specifying an AS <record> clause with
+  500           //	   no record definition.  This only works on databases which have
+  510           //	   metadata that contains this information already.  The record is
+  520           //	   created with a field for each item in the result set row.  You
+  530           //	   can use the MEMBERS() function to get the names of the fields.
+  540           //
+  550           //	7. The EOF() function indicates if there is more data in the result
+  560           //	   set.  If true, then a read will result in an end-of-file error.
+  570           //	   However, a new PRINT statement with a new query will reset this
+  580           //	   and more result data can be returned.
+  590           
+  600           //	Let's create DSN, database shortcut name.  This is a record that
+  610           //	has the connection string, username, and password in well-known
+  620           //	fields.  The use of a DSN is identified by passing a RECORD as the
+  630           //  name of the database rather than a string expression.
+  640           
+  650           LET DSN_FAMILY.DRIVER = "firebirdsql"
+  660           LET DSN_FAMILY.PATH = "/vulcantest/test.fdb"
+  670           LET DSN_FAMILY.SERVER = "localhost"
+  680           LET DSN_FAMILY.USER = "sysdba"
+  690           LET DSN_FAMILY.PASSWORD = "masterkey"
+  700           
+  710           LET SYS$DRIVERS = [ "org.firebirdsql.jdbc.FBDriver" ]
+  720           
+  730           OPEN DATABASE DSN_FAMILY AS FB QUERY "SELECT * FROM FAMILY ORDER BY FIRST"
+  740           PRINT RECORDMAP(FB.MAP, "FB")
+  750 LOOP:     
+  760           IF EOF( FB ) THEN GOTO DONE
+  770           
+  780           GET FB AS FAMILY
+  790           PRINT " ", FAMILY
+  800           GOTO LOOP
+  810           
+  820 DONE:     
+  830           CLOSE FB
+ 
+  100           PROGRAM $PI_TEST
+  110           // Version: 1.0
+  120           // Date:    Thu Mar 16 08:10:29 EST 2006
+  130           // Author:  tom
+  140           LET OLDPI = 0
+  150           FOR I = 1 TO 150
+  160             LET NEWPI = PI( I )
+  170             IF NEWPI = OLDPI THEN GOTO DONE
+  180             LET OLDPI = NEWPI
+  190           NEXT I
+  200 DONE:     
+  210           // If we are invoked via CALL, just return the best value
+  220           // of PI we calculated.  The $MODE variable is automatically
+  230           // created by JBasic when the program is started...
+  240           
+  250           IF $MODE = "CALL" OR $MODE = "FUNCTION" THEN RETURN NEWPI
+  260           
+  270           // Otherwise we were RUN, so print out the conclusions.
+  280           
+  290           PRINT "Value unchanged after "; I; " iterations, "; NEWPI
+  300           RETURN
+  310           
+ 
+  100           FUNCTION PI( COUNT = 22 )
+  110           // Version: 1.0
+  120           // Date:    Thu Mar 16 08:05:29 EST 2006
+  130           // Author:  tom
+  140           
+  150           // Use a Taylor series to calculate pi.  The parameter is
+  160           // the number of iterations to run the series; the higher
+  170           // the number, the more accurate the result.  In Java,
+  180           // there is no benefit to a number greater than  22 since
+  190           // the series then exceeds the precision limits of IEEE
+  200           // number systems.  We test for 30 to allow for range
+  210           // probing by the caller in PI_TEST
+  220           
+  230           IF( COUNT < 0 ) OR( COUNT > 30 ) THEN COUNT = 22
+  240           
+  250           INTEGER N = 0
+  260           
+  270           // It's critical that these both be floating point values,
+  280           // or the entire series is done in integer math which sort
+  290           // of defeats the purpose... :-)
+  300           
+  310           DOUBLE SUM = 3.0
+  320           DOUBLE ASUBN = 3.0
+  330           FOR I = 1 TO COUNT
+  340             LET N = N + 1
+  350             LET N1 = N * 4
+  360             LET N2 = ( N * N ) * 4
+  370             LET D1 = N2 - N1 + 1
+  380             LET D2 = ( N2 * 2 + N1 ) * 2
+  390             LET ASUBN = ASUBN * D1 / D2
+  400             LET SUM = SUM + ASUBN
+  410             
+  420           NEXT I
+  430           RETURN SUM
+
+  100           PROGRAM AVERAGE
+  110           //	Sample Program AVERAGE
+  120           //	Version 1.0
+  130           //	By Tom Cole
+  140           //
+  150           //	Initialize the summation variables
+  160           DOUBLE SUM = 0.0
+  170           INTEGER COUNT = 0
+  180           //
+  190           //	Get the next input value
+  200 GET_NEXT: 
+  210           LINE INPUT "Enter grade or END: ", GRADE
+  220           //
+  230           //	Are we done?  Make sure ÒendÓ and ÒENDÓ are
+  240           //	treated the same by uppercasing user value.
+  250           IF UPPERCASE( GRADE ) = "END" THEN GOTO DONE
+  260           //
+  270           //	Convert the string to a number, and sum up
+  280           LET NUMGRADE = DOUBLE( GRADE )
+  290           IF NOT NAN( NUMGRADE ) THEN GOTO ADD_IN
+  300           PRINT QUOTE( GRADE ); " is not a number, ignoring"
+  310           GOTO GET_NEXT
+  320 ADD_IN:   
+  330           LET COUNT = COUNT + 1
+  340           LET SUM = SUM + NUMGRADE
+  350           GOTO GET_NEXT
+  360           //
+  370           //	If done, calculate and print average
+  380 DONE:     
+  390           IF COUNT = 0 THEN GOTO NO_GRADES
+  400           LET AVE = SUM / COUNT
+  410           PRINT USING "The average is ###.##", AVE
+  420           //
+  430           RETURN
+  440           //	All done, program stops here
+  450 NO_GRADES:PRINT "You didn't enter any grades."
+  460           RETURN
+  
+  100           VERB DISASM
+  110           // Version: 1.1
+  120           // Date:    Jan 21, 2009
+  130           // Author:  cole
+  140           LET KIND = "PROGRAM"
+  150           LET NAME = SYS$CURRENT_PROGRAM
+  160           LET MAP = { PROGRAM: "", VERB: "VERB$", FUNCTION: "FUNC$", TEST: "TEST$" }
+  170           IF LENGTH( $ARGS ) > 0 THEN
+  180             IF LENGTH( $ARGS ) = 1 THEN
+  190               LET NAME = $ARGS[ 1 ]
+  200               ELSE
+  210               LET T = UPPERCASE( $ARGS[ 1 ] )
+  220               IF LOCATE( T, MEMBERS( MAP ) ) = 0 THEN
+  230                 PRINT "DISASM error, unknown program type "; T
+  240                 RETURN
+  250               END IF
+  260               LET NAME = MAP[ $ARGS[ 1 ] ] || $ARGS[ 2 ]
+  270             END IF
+  280           END IF
+  285           IF NAME = "" THEN
+  287               PRINT "DISASM error, no current program"
+  288               ELSE
+  290               EXECUTE "SHOW " || KIND || "(DISASM) " || NAME
+  300           END IF
+  310           RETURN
+   
+  100           VERB PROFILE
+  110           // Version: 1.1
+  120           // Date:    Jan 21, 2009
+  130           // Author:  cole
+  140           LET KIND = "PROGRAM"
+  150           LET NAME = SYS$CURRENT_PROGRAM
+  160           LET MAP = { PROGRAM: "", VERB: "VERB$", FUNCTION: "FUNC$", TEST: "TEST$" }
+  170           IF LENGTH( $ARGS ) > 0 THEN
+  180             IF LENGTH( $ARGS ) = 1 THEN
+  190               LET NAME = $ARGS[ 1 ]
+  200               ELSE
+  210               LET T = UPPERCASE( $ARGS[ 1 ] )
+  220               IF LOCATE( T, MEMBERS( MAP ) ) = 0 THEN
+  230                 PRINT "PROFILE error, unknown program type "; T
+  240                 RETURN
+  250               END IF
+  260               LET NAME = MAP[ $ARGS[ 1 ] ] || $ARGS[ 2 ]
+  270             END IF
+  280           END IF
+  285           IF NAME = "" THEN
+  287               PRINT "PROFILE error, no current program"
+  288               ELSE
+  290               EXECUTE "SHOW " || KIND || "(PROFILE) " || NAME
+  300           END IF
+  310           RETURN
+
+program $webserver(port=6501)
+		
+wait:
+		open server socket port as #1
+		req = ""
+        line input #1, req
+		cmd = substring(req, locate(" ", req)+1)
+		cmd = left(cmd, locate(" ", cmd))
+		x = url("http://localhost/", cmd)
+		cmd = uppercase(substring(x.path,2))
+		
+		print "Web status request on port "; __file_1.port; " "; req; " cmd="; cmd
+		print #1; "<html> <pre>"
+		console output #1
+		if cmd = "" then cmd = "STATUS" 
+		if locate(cmd, [ "STATUS", "MEMORY", "FILES", "THREADS", "LOCKS", "SERVER", "SYMBOLS"]) < 1 then 
+			print #1, "Unknown command "; cmd
+		else
+			if cmd = "SYMBOLS" then cmd = "SYMBOLS ALL"
+			print #1, "CMD = "; cmd
+			execute "SHOW " || cmd
+		end if
+		console output
+		print #1; "</pre></html>"
+		close #1
+		goto wait
+
+1000             PROGRAM $SHOWPERMISSIONS
+1010             // Version: 1.0
+1020             // Date:    Mon Feb 07 18:32:32 EST 2011
+1030             // Author:  tom
+1035             // Used by SHOW PERMISSIONS command
+1040             ARRAY A = PERMISSION( )
+1080             IF LENGTH( A ) = 0 THEN
+1090             PRINT MESSAGE( "_PERM__NOPERMS" )
+1100             RETURN
+1110             END IF
+1120             PRINT MESSAGE( "_PERM__PERMS" )
+1130             INTEGER IX
+1140             STRING MCODE, MTEXT
+1150             FOR IX = 1 TO LENGTH( A )
+1160             LET MCODE = "_PERM_" || A[ IX ]
+1170             LET MTEXT = MESSAGE( MCODE )
+1180             IF MTEXT = MCODE THEN MTEXT = ""
+1190             PRINT "  "; PAD( A[ IX ], 16 ); MTEXT
+1200             NEXT IX
+1210             RETURN

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- This is an Ant build file for building JBasic.  It creates the    -->
+<!-- basic executable jar that contains the code plus the help and     -->
+<!-- library files.                                                    -->
+
+<!-- Tom Cole, January 2011    Updated to reflect current version #s   -->
+
+
+
+<project name="JBasic" default="jars" basedir=".">
+
+<target name="init">
+</target>
+	
+  <!-- =================================================================== -->
+  <!-- Compiles code                                                       -->
+  <!-- =================================================================== -->
+ 
+<target name="compile"
+          depends="init"
+          description="Compile source *.java files">
+    <javac srcdir="src\org\fernwood\jbasic"
+           destdir="bin"
+           source="1.5"
+           >
+    	<compilerarg line="-Xlint:unchecked"/>
+    </javac>
+    <javac srcdir="src\net\wimpi\telnetd"
+           destdir="bin"
+           source="1.5"
+           >
+    </javac>
+  </target>
+
+
+
+<target name="jars"
+          depends="compile"
+          description="Create the jar file">
+ 
+    <jar jarfile="jbasic.jar">
+         <manifest>
+             <attribute name="Main-Class" value="org.fernwood.jbasic.JBasicMain"/>
+             <attribute name="Specification-Title" value="JBasic"/>
+             <attribute name="Specification-Vendor" value="Forest Edge"/>
+             <attribute name="Specification-Version" value="2.0"/>
+
+             <attribute name="Implementation-Title" value="JBasic"/>
+             <attribute name="Implementation-Vendor" value="Forest Edge"/>
+             <attribute name="Implementation-Vendor-Id" value="org.fernwood"/>
+             <attribute name="Implementation-Version" value="2.9"/>
+             <attribute name="Copyright" value="2010"/>
+
+          </manifest>
+
+         <!-- Need to include the help file and library file, as   -->
+         <!-- well as the actual binaries from the compilation.    -->
+
+        <fileset file="JBASIC-HELP.TXT"></fileset>
+        <fileset file="Messages.xml"></fileset>
+        <fileset file="PermissionNames.xml"></fileset>
+        <fileset file="OptDict.xml"></fileset>
+    	 <fileset dir="src\org\fernwood\jbasic">
+              <include name="**/*.jbasic"/>
+             </fileset>
+    	 <fileset file="telnetd.properties"></fileset>
+         <fileset dir="bin"></fileset>
+    		<!-- Uncomment to include JavaDoc in jar file:  <fileset dir="doc"></fileset> -->
+    	
+    </jar>
+  </target>
+
+ 
+ </project>
+

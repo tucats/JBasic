@@ -1,0 +1,34 @@
+
+Quick Start Guide
+-----------------
+
+
+1.	Open a command shell, such as the CMD window on Windows
+	or a Terminal window on Mac OS X.
+	
+2.	Set default directory to the location where jbasic.jar
+	is located.  There is one located in the JBasic runtime
+	folder, and there can be one in the JBasic source folder.
+	
+	If you have the source folder but do not have the jar,
+	you can use Eclipse or Ant to create the jar.
+	
+3.	Invoke the jar as a main program, as in
+
+		java -jar jbasic.jar
+	
+4.	Use the HELP command for information on next steps. 
+	Additional documentation can be found in the user's
+	guide document (a PDF file) located in the "moredoc"
+	sub-folder of the project. Additional info can be
+	found on the web site:
+	
+		http://jbasic.net/
+
+
+									- Enjoy!
+									
+									  Tom Cole
+									  tomcole@users.sf.net
+
+		

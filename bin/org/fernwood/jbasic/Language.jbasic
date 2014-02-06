@@ -1,0 +1,73 @@
+// THIS SOURCE FILE IS PART OF JBASIC, AN OPEN SOURCE PUBLICLY AVAILABLE
+// JAVA SOFTWARE PACKAGE HOSTED BY SOURCEFORGE.NET
+// 
+// THIS SOFTWARE IS PROVIDED VIA THE GNU PUBLIC LICENSE AND IS FREELY
+// AVAILABLE FOR ANY PURPOSE COMMERCIAL OR OTHERWISE AS LONG AS THE AUTHORSHIP
+// AND COPYRIGHT INFORMATION IS RETAINED INTACT AND APPROPRIATELY VISIBLE
+// TO THE END USER.
+// 
+// SEE THE PROJECT FILE AT HTTP://WWW.SOURCEFORGE.NET/PROJECTS/JBASIC FOR
+// MORE INFORMATION.
+// 
+// COPYRIGHT 2003-2011 BY TOM COLE, TOMCOLE@USERS.SF.NET
+//
+VERB LANGUAGE
+		// Version: 1.0
+		// Date:    Wed Mar 01 13:19:38 EST 2006
+		// Author:  tom
+		
+		// This program displays the current language setting.  If a
+		// single parameter is given, then that becomes the new
+		// language.
+		
+		// Languages are defined as two-character codes, such as
+		//   EN - English
+		//   FR - French
+		//   ES - Spanish
+		//
+		// The table below contains the codes and full English names
+		// of the supported languages.  If the user attempts to name a
+		// language code note in this table, they get a mild warning.
+		
+		DATA "EN", "English"
+		DATA "FR", "French"
+		DATA "ES", "Spanish"
+		DATA "DE", "German"
+		DATA "JA", "Japanese"
+		DATA "ZH", "Chinese [simplified]"
+		DATA "PT", "Portuguese"
+		
+		N = 0
+
+READDATA:
+		IF EOD() THEN GOTO CHECKARG
+		READ LCODE, LNAME
+		N = N + 1
+		LCODES[N] = LCODE
+		LNAMES[N] = LNAME
+		GOTO READDATA
+		
+CHECKARG:
+		IF LENGTH( $ARGS ) <> 1 THEN GOTO SHOW_CURRENT
+		LET LANG = $ARGS[ 1 ]
+		IF LENGTH( LANG ) > 2 THEN LANG = LEFT( LANG, 2 )
+		LANG = UPPERCASE(LANG)
+
+		N = LOCATE( LANG, LCODES )
+		IF N < 1 THEN GOTO BADCODE
+		
+		LET SYS$LANGUAGE = LANG
+
+SHOW_CURRENT:	
+		N = LOCATE( SYS$LANGUAGE, LCODES )
+		IF N < 1 THEN LNAME = "Unknown" ELSE LNAME = LNAMES[N]
+		
+		PRINT "Current language is "; SYS$LANGUAGE; " ("; LNAME; ")"
+		RETURN           
+BADCODE:
+		PRINT "Warning, the language code "; LANG;" is unknown and may result in"
+		PRINT "         incorrect or non-functional language translations."
+		PRINT
+		LET SYS$LANGUAGE = LANG
+		GOTO SHOW_CURRENT
+		

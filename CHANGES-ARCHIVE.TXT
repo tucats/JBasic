@@ -1,0 +1,1808 @@
+
+What is this file?  This file contains a record of changes made to various
+versions of JBasic.  However, the list was getting kind of long, so any
+changes prior to 2.0 where removed from the primary help file and put here.
+In the future, change log entries from previous major releases will be moved
+here as new major releases are ready.
+
+
+]CHANGES 1.0
+
+    First version.  Basically an extension of the expression parsing
+    project, with stored programs added.
+
+]CHANGES 1.1
+
+    Added branching logic, user functions, subroutines, and generally 
+    cleaned up the language to be more BASIC-like, though clearly not 
+    a perfect clone.  Added arrays as a data type.
+
+
+]CHANGES 1.2
+
+    Added Library.jbasic as the default program load location.  Added 
+    file IO to the language.  Added INPUT and LINE INPUT operations.  
+    Added autocall of programs when an unrecognized verb is parsed.  
+    Added HELP as an autocall program to support minimal online 
+    documentation.
+
+
+    August 9, 2004
+    --------------
+    
+    1.  When new programs are added, they are automatically stored in 
+        the array SYS$PROGRAMS.  
+    
+    2.  The LENGTH() function now can return the length of an array if 
+        that is it's argument (as opposed to an expression).
+    
+    3.  System variables that need to be immutable (like TRUE) are now 
+        marked readonly.  You can create readonly variables by putting 
+        "!" after the name in an assignment, like SERIAL! = 33.  
+    
+    4.  The SHOW SYMBOLS command displays the readonly status for variables.
+    
+    
+    August 10, 2004
+    ---------------
+    1.  Added TEST command to support running unit tests.  Distinguish 
+        between VERB, PROGRAM, and TEST program types.  
+    
+    2.  Argument lists to functions, verbs, and programs are now variable 
+        length array in ARG$LIST.  The invocation of the jar arguments are
+        in SYS$ARGS as an array.  
+    
+    3.  The user program MAIN is run if found, else the ABOUT program 
+        is run.  
+    
+    4.  Added SHOW FUNCTIONS capability to enumerate the built-in 
+        functions.  
+    
+    5.  Added array declaration syntax { i, j, k } and the ability to
+        print an array variable and get this string back.  Improved 
+        tokenizer to distinguish integer from double constants and set 
+        token type correctly.
+
+
+    August 13, 2004
+    ---------------
+    1.  Added REPEAT function as intrinsic function, repeats a character
+        string n times.
+
+    2.  Added user-written function PAD that pads a string left or right
+        with blanks.
+
+    3.  Add TRACE command that accepts a statement as the argument, and
+        runs it with SYS$DEBUG_STATEMENTS enabled for tracing.
+
+    4.  Modified MAIN program to that it runs the command line argument
+        as a single statement and quits, if there is an argument.  If
+        no argument, just runs the ABOUT program.
+    
+    
+    August 20, 2004
+    ---------------
+    1.  Changed basic identifier syntax for things like RUN and CALL.
+        Previously these had to be string expressions or constants. 
+        However, to conform more with standard basic, they are now identifier
+        type tokens; i.e RUN BOB runs a program named "bob".  In order to 
+        support indirection (used by the TEST command or GOTO USING), most 
+        cases where an identifier can be parsed now also allow USING(expr) in 
+        place of the identifier - the expression is evaluated and the string
+        result used as the identifier.  GOTO USING now requires parenthesis 
+        around the expression.  This is supported in LOAD, RUN, GOTO, CALL,
+        and in parameter names in argument lists and RETURNS values.
+
+    August 26, 2004
+    ---------------
+    1.  Added better error messaging in expressions evaluation.  When an
+        error in expression parsing occurs, store the status in the status
+        field.  Made expression processing methods non-static.
+    
+    2.  Cleanup of code calling expression handler, to detect errors and
+        print more detailed messages.  Use print() method in expression
+        object to print detailed info, or return status field as called
+        result as appropriate.
+       
+       
+]CHANGES 1.3
+
+    September 7, 2004
+    -----------------
+    1.  Changed version number to 1.3.
+    
+    2.  Added support in the project for ANT-based builds to create the jar
+        files for sharing with other systems.  Strips out the javadoc and
+        only includes classes and the help and library files.
+    
+    3.  Version number string now contains static version number (1.3 at
+        the moment) plus the build date for JBasic.class to distinguish
+        sub-builds.
+    
+    4.  Added DATE() function which returns full current date string.  TO DO
+        list includes coming up with additional DATE and and TIME functions.
+       
+
+    September 8, 2004
+    -----------------
+    1.  Added documentation on each of the functions to the help material.
+    
+    2.  Changed the format of SHOW FUNCTIONS show user-written and intrinsic
+        functions are formatted the same way.
+
+    September 23, 2004
+    ------------------
+    1.  Added new parse() and locate() built-in function to support picking
+        apart strings and looking up values in an array.  Added new match()
+        method to Value objects for identifying exact matches (type and value).
+    
+    2.  Used the new functions to update the HELP user-written verb so that
+        it can tell if a help item is for a user-written function and note
+        it as such in the help output.
+    
+    3.  Modifications so that JBasic can be called from another program.  
+        Initialization is moved to it's own method so it can be shared by
+        constructors and the main() invocation.  Added run() as a method for
+        executing a single statement.  Changed Status class so that print()
+        and printError() methods are available to the caller.
+    
+    4.  SHOW FUNCTIONS was showing intrinsic functions in natural discovery
+        order for the method scan.  Added code to copy it into a sorted array
+        and dump the array, so the built-ins are in alphabetical order now.
+
+    October 8, 2004
+    ---------------
+    1.  Added new MEMORY function that returns values from the Runtime()
+        information from the JVM.  Includes the ability to force garbage
+        collection.  Updated the HELP to include info on MEMORY().
+
+    October 20, 2004
+    ----------------
+    1.  Revamp signals.  They are now string keys rather than integers.  The
+        translation to message strings is now accomplished through a TreeMap
+        that is built during initialization. Successful messages have a code 
+        string that starts with a "*" character, so success() and failed() 
+        tests are still fairly efficient.
+    
+    2.  Users can create their own signals by using the MESSAGE command, which
+        accepts a keyword and a message text string, stored with the built-in
+        messages.
+    
+    3.  A user can create one or more ON statements to catch errors.  These 
+        are active in the program scope that they are created in, and are 
+        ignored when scope exits.  The ON statement can give the specific
+        error it plans to catch or can be ON ERROR which means any error.  
+        The specific error is looked for before testing to see if a generic 
+        ON ERROR was given.
+    
+    4.  A user can create an error condition programatically with the SIGNAL
+        verb, which gives the message code and optionally the argument.  
+        When an ON unit is signaled, the statement in the ON unit is executed 
+        in the context of the current running program frame; there is no 
+        implicit unwind (yet).
+       
+    
+    December 13, 2004
+    -----------------
+    1.  Added property() function that gets values from System.getProperty()
+        tables.  This lets us see what os.name we are running, etc.  This 
+        will be needed to make the "Files" pseudo-verb work right, for 
+        example.
+    
+    
+    April 19, 2005
+    --------------
+    
+    1.  Added MSG() built-in function, which given a message number and an
+        optional second argument which is the substitution value, will return
+        a string with the formatted message.  If the signal code is unknown,
+        the return string is the code value.
+    
+    2.  Added HELP text for the MSG function and the MESSAGE statement.
+    
+    3.  Disallow ON statements when there is no running program; there is no
+        context to allow secondary execution anyway.
+     
+    4.  Added SHOW MESSAGES command that will dump the message text list.
+        
+    5.  Added SYS$LAST_SIGNAL variable which contains the last message that
+        was returned from a statement handler - either as a SIGNAL or as
+        an error.  Also added SYS$LAST_MESSAGE which contains the formatted
+        text of the error, so the substitution value (if any) is not lost.
+        
+    April 29, 2005
+    --------------
+
+    1.  Added ability to have default arguments.  In the PROGRAM statement,
+        put an "=" followed by an expression after any argument that is to
+        have a default value if it's not given on the invocation CALL 
+        statement.  The expression is evaluated in the context of the
+        calling program at the time of invocation.  Updated BENCHMARK
+        to use this ability for number of iterations.
+   
+   May 13, 2005
+   ------------
+   
+   1.   Fix up HELP so that function names are not displayed when HELP
+        TOPICS is run.  Make HELP FUNCTIONS be a special key that lists
+        the function names.  Added help (at least stubs if not full 
+        help text) for the rest of the statements.
+        
+   January 11, 2006
+   ----------------
+   
+   1.   Fixed problem in FOR-NEXT where a loop should not run at all
+        because the index already exceeds the required end-point value.
+        The code now searches for the matching NEXT with the correct
+        index variable and resumes execution following that statement.
+        
+   2.   Fixed a problem where an increment of zero was causing a FOR
+        NEXT loop to run forever.  The program now signals an error.
+        
+   3.   Added ability to load a program from an array.  Use the syntax
+        LOAD FROM ARRAY array-name
+        Each line of the array is processed as a statement, just like 
+        the LOAD FROM a file works.  The array can contain multiple
+        program, verb, or function definitions.
+        
+   4.   Added two new functions.  PROGRAMLENGTH("name") returns the
+        number of lines in the named program as an integer.
+        PROGRAMSTATEMENT("name", n) returns a string containing
+        the nth program statement in the given program.
+        
+   5.   Unsurprisingly, #4 is used to implement a new verb.
+   
+            SAVE programname AS arrayname
+        
+        This will save a program in memory into an array.  This
+        array could be manipulated, saved to disk, etc.
+        
+   6.   Fixed a bug where the GLOBAL keyword in a LET statement
+        stored the value in the "Constants" table rather than
+        the "Global" table.  Additionally added a PARENT keyword
+        that means store the value in the parent's symbol table.
+        For console commands, this is the same as GLOBAL, but
+        for a program or function called from another function,
+        it lets the callee store data in the scope of the caller.
+        This is used by SAVE .. AS to ensure that the array is
+        accessible at whatever level it is being used at.
+        
+   January 12, 2006
+   ----------------
+
+   1.   Added ability to directly address programs like arrays. 
+        You can read statements like
+         
+              x = VERB$HELP[1]
+              
+        You can modify statements like
+         
+              ABOUT[1] = "PRINT " + QUOTE("Hello"")
+              
+        You can add to the end of the program like
+         
+              x = LENGTH(about)
+              about[x+1] = "PRINT"
+          
+   2.   Programs can be data elements now, which are special
+        type similar to arrays.  So you can assign a program
+        name to a symbol, and access it directly via the
+        array syntax.  You can also invoke the program 
+        indirectly via the variable.  This lets you set a
+        variable to a program and then run or call it,
+        via the "USING" syntax.  The following will 
+        modify ABOUT and then run in, indirectly.  Note
+        that you cannot COPY a program this way, data elements
+        of programs are really just named pointers, just like
+        arrays.
+         
+             x = ABOUT
+             x[4] = "PRINT " + quote("hi")
+             call using(x)
+             
+   
+   3.   LIST command now lists programs and arrays.  If the
+        
+              LIST FILE id, program
+              
+        syntax is used, the output is sent to the open file.
+        If the FILE id, clause is omitted, it's sent to the
+        console, and line numbers are added.  For arrays
+        the line number is the array index; for programs it's
+        the line number of the statement.
+   
+   
+    January 19, 2006
+    ----------------
+    
+    1.  Program optimization for speed.  When Statement.invokeVerb() is
+        called to puzzle out the invoking class type to create a new
+        statement object, we now keep that object cached in the parent
+        statement as actualStatement.  This means on subsequent execution
+        of the identical and specific statement, we can just invoke the
+        run() method directly without doing the extra reflection stuff.
+        Saves about 15% in overall performance of most statements.
+        
+    2.  Implement the TIME command, which takes as it's argument a
+        statement to execute.  The statement is executed, and the 
+        elapsed time and number of statements executed is displayed.
+        Clearly, using this for a RUN or CALL statement is more useful
+        than a simple single statement.
+    
+    3.  Commented out some of the extra debug flag setting code.  There
+        were too many places were sys$debug_statement or similar
+        variables were read and the value stored in an object-local
+        area.  These had to be processed between each statement since 
+        the statement itself could have changed the value, but it's too
+        costly to do it preemptively.
+    
+    4.  Statements are retokenized by default when they are stored in
+        the statement object. This makes the text more uniform when it
+        is listed, and quicker to parse as well.
+        
+    5.  Labels are removed when the line is stored away, and kept in
+        a separate field of the object.  Similarly, the implicit LET
+        is made explicit when the text is stored, and not during
+        statement decoding.  As a result, you must always use the
+        store() method of a Statement to store the text away, to
+        handle the reparsing as well as zeroing out the statement
+        class-specific object field from #1 above.
+         
+    TODO
+    
+    1.  Given #3 above, I think the goal would be to set an extra boolean
+        flag in the key variables that let us detect when they've changed.
+        If they have changed, then we'll call a utility service that will
+        determine if we're setting a global debug flag for expressions,
+        tokens, etc.
+        
+    2.  Time to create a generalized formatter, which knows how to handle
+        picture strings and the like. This can be used for PRINT, but also
+        can be surfaced as a FORMAT() function.  Additionally, it can 
+        probably be used internally in several places.
+        
+    January 21, 2006
+    ----------------
+    
+    1.  Implemented connectors.  These are variables in the system symbol
+        table that have a prefix of SYS$$.  When they are examined or 
+        scanned by SHOW SYMBOLS, they are updated (via a new method) with
+        whatever appropriate runtime value is required.  
+        
+        For example, SYS$$CACHEHITS is set to JBasic.statementCacheHit,
+        which counts how many times a previous-decoded statement is
+        executed versus a statement that must be reparsed completely
+        and looked up via reflection.
+        
+        Additional connectors are created by modifying the method
+        SymbolTable.updateConnectors().
+        
+        [This satisfies the needs of TODO #1 above]
+        
+    2.  Changed the way SHOW TEST and SHOW VERB work, to use a common
+        private method with a label and filter specific to the command.
+        
+
+]CHANGES 1.4
+
+    January 25, 2006
+    ----------------
+    
+    1.  Corrected some issues with how the Library.jbasic file was found;
+        it needs to be part of the package for the loader to find it when
+        it has been invoked as an embedded program.
+        
+    2.  Added ability to extend statements, by creating new statement-
+        specific class files, using the same format as those in the JBasic
+        primary jar. Added SYS$PACKAGES array of strings, which must include
+        the name(s) of all packages to search for statements.  By default
+        this is empty, but must contain the package(s) containing extensions.
+        
+    3.  The big one is adding ByteCode support.  Statements can surface a
+        compile() method instead of (or in addition) to a run() method.
+        The compile() method parses the code and stores it as ByteCode
+        in the statement object.  The compile method is called when the
+        text is stored in the statement, if it is found.  When the 
+        statement is executed, if it has a byteCode vector that is
+        non-null, then that ByteCode is interpreted rather than calling
+        back to the statement's handle.  A compile can detect that it
+        is not possible to compile cleanly and return Status.NOCOMPILE
+        which means the statement must be interpreted at runtime like
+        it used to be.
+        
+    4.  This necessitated creating a new ByteCode class which has the
+        handlers for storing, displaying, etc. the byte codes, as well
+        as a run() class that executes the ByteCodes for that statement.
+        Note that a ByteCode stream is only for a single statement, and
+        therefore can have only a single flow-of-control exit from the
+        statement, just like the interpreted versions.  
+        
+    5.  This is all big enough to justify upgrading to 1.4 for the JBasic
+        version number.
+        
+        Doing the ByteCode has accelerated typical programs by a factor
+        of 6-8 times. A 2Ghz G5 runs about 30,000 statements a second.
+    
+    January 26, 2006
+    ----------------
+    
+    1.  Added numerous new compilation support modules.
+    
+    2.  Began to add support to allow a user to list/modify/save a
+        program interactively from the command prompt, a-la conventional
+        BASIC programs where entering statements with a line number
+        means "store it away" rather than "execute it immediately."
+
+
+    January 31, 2006
+    ----------------
+    1.  Programs can now be entered, saved, listed, etc.  The current
+        program is the one you are editing and/or running.
+        
+    2.  Added record types, so x.a = "Tom" causes X to be a special
+        kind of array with named members, as in { A: "Tom" }.  You
+        can reference fields again in statements, etc.
+        
+    3.  Added FILES command that uses new FILETYPES() function.
+    
+    
+]CHANGES 1.4 - 2
+
+    February 1, 2006
+    ----------------
+    
+    1.  Added compiler built-in functions for things like QUOTE,
+        TOTAL(), and LENGTH().  If a built-in compilation method
+        exists in the CompileFunctions class, then it is called
+        to try to generate code for the function.  If it cannot
+        generate code correctly (bad argument count, for example)
+        or the built-in function does not exist, a _CALLFUNC
+        ByteCode is used to try to resolve the issue at runtime.
+    
+    2.  Documented global variables. 
+    
+    3.  Changed SHOW SYMBOLS to SHOW SYMBOL TABLE <kind> where
+        <kind> is LOCAL, GLOBAL, PARENT, or CONSTANTS.  The
+        default is LOCAL.
+    
+    4.  General JavaDoc cleanup.
+    
+    
+    February 9, 2006
+    ----------------
+    
+    1.  Major revision of the SHOW statement, so it's more consistent
+        and doesn't use sub-verbs.
+    
+    2.  Restructuring of how FILE identifiers are handled in the JBasic
+        language.  Previously they identified the file by its native
+        text name, but this caused problems and collisions.  Now a 
+        file identifier is a record that contains fields describing
+        the name, mode, and a unique sequence number.  This sequence
+        number is used to keep the TreeMap of the records.
+        
+    3.  Support KILL FILE <ident> as well as KILL "<name>" to let you
+        kill an open file.
+        
+    4.  Allow various runtime options to be set via the SET statement,
+        which was previously vestigial at best.  SHOW OPTIONS will show
+        the state of the current options.
+        
+    5.  Allow expressions to be compiled, even in interpreted command
+        statements.  The expression evaluator compiles the code and
+        runs it (without optimization) immediately.  This means there
+        is only one area where language extensions need to be made (the
+        compiler and bytecode execution modules) as opposed to also
+        making compatible-yet-wholly-different changes to the evaluate()
+        interpreter module in Expressions.
+    
+    6.  LOAD and SAVE load and save a "workspace" which is the collection
+        of all user-written programs, functions, verbs, etc.  The default
+        name is "Workspace.jbasic" in the current directory, and is
+        LOADed automatically at startup.  Changing a program and then
+        failing to SAVE results in a warning when you try to quit.
+        
+    7.  The PROFILE command displays a program and shows how many times
+        each statement in the program was executed.  This is largely to
+        help me identify statements that need to be compiled or better
+        optimized.
+        
+]CHANGES 1.4 - 3
+    
+    February 12, 2006
+    -----------------
+    
+    1.  Added compilation support for many more statements, most notably
+        the DO-UNTIL, DO-WHILE, and FOR-NEXT loops.
+   
+    2.  Add "linked programs."  These are programs where the accumulated
+        bytecode for each statement is aggregated together into a single
+        executable bytecode stream.  This saves time on the intra-statement
+        execution management.  It also allows label branches (except GOTO
+        USING) to directly address a bytecode location.  Even GOTO USING
+        uses a minimal TreeMap() of the labels and addresses, so lookups
+        are not a linear search anymore.
+    
+    3.  Added LINK and UNLINK commands which explicitly link a program,
+        or remove the aggregate link and restore the individual statements.
+ 
+    4.  The SYS$AUTOLINK variable determines if a program is linked the
+        first time it is run, automatically.  This only works if the
+        automatic SYS$COMPILE option is also enabled.
+        
+    5.  Modified TIME command to report instructions executed as well
+        as statements.  Removed the statements/second since it is now
+        largely meaningless with the advent of LINKed programs.
+        
+]CHANGES 1.4 - 4
+
+    February 17, 2006
+    -----------------
+    
+    1.  Restructure symbol table manangement.  Symbol tables aren't bound
+        to a statement or program, but an execution context.  This requires
+        passing symbol table information handles to execution methods, but
+        removes tons of wasteful symbol table management.
+        
+    2.  Removed interpreter modules for any statement that can be compiled;
+        if you can compile it, you can't interpret it.
+        
+    3.  Changed version to 1.4-4.
+    
+    4.  Fixed numerous bugs in symbol table handling (removing circular
+        parent loops, etc.)  SYS$COMMAND_LINE renamed to ARG$COMMAND_LINE
+        so it is scoped to the local symbol table.
+        
+    5.  Fixed numerous previously-uncaught syntax errors in provided 
+        .jbasic files.  The compiler now does a better job of catching 
+        bad syntax.
+        
+    6.  Extended SHOW SYMBOLS output for arrays and records to show a
+        portion of the formatted object (up to 60 characters).
+ 
+
+]CHANGES 1.4 - 5
+
+    February 22, 2006
+    -----------------
+    
+    1.  Fixed bug in IF-THEN-ELSE optimizations that prevented it from 
+        working correctly.
+    
+    2.  Allow "AND", "OR", and "NOT" syntax for boolean operations.
+    
+    3.  Fix bugs in _AND, _NOT bytecode operations.
+    
+    4.  Introduce "PROTECTED" programs, which are compiled and marked such
+        they cannot be listed, etc.  Saved programs that are in PROTECTED 
+        mode are stored in compiled form only, not the BASIC source.  The 
+        PROTECT command is used to mark a program this way.  Once a program
+        is PROTECTED, it cannot be unprotected. The source is discarded, 
+        so keep a copy of any program you protect... :-)
+    
+    5.  Add ASM statement that lets you write programs in bytecode if needed.
+    
+    6.  Add RANDOM() function which returns a random number given some range
+        information, and RANDOMLIST() which returns an array of integers in
+        random order. Added CARD() function to format an integer as a 52-card
+        deck value.  Added UID() function that generates a unique ID string for
+        use in generating ID values in programs.
+        
+    7.  Fix bugs in handling unwinds of loops.  You can now correctly GOTO
+        out of a loop and restart a new loop.
+
+]CHANGES 1.4 - 6
+
+    March 15, 2006
+    --------------
+    
+    1.  Added DATA statements, READ and REWIND statements, and an EOD() 
+        function to test when the DATA has been exhausted.  DATA statements 
+        can hold any constant expression.  The compiled code for these is 
+        captured when a program initializes execution, and READ skips through
+        a vector of bytecode to execute each one in turn.
+    
+    2.  Playing around a little bit more with object stuff, creating a record
+        with some required features that handles class and method hierarchy.
+        
+    3.  We're getting close (or maybe already at the point) where linking 
+        isn't optional anymore. 
+    
+    4.  Changed semantics a bit for SHOW SYMBOLS, so you can SHOW LOCAL 
+        SYMBOLS or SHOW SYMBOL TABLE LOCAL and they mean the same thing.
+
+]CHANGES 1.5
+
+    March 27, 2006
+    --------------
+    
+    1.  Significant cleanup of static objects, so multiple instances of 
+        JBasic objects will not collide.
+    
+    2.  Repackaging.  The class list was getting huge (>80 classes) so I've
+        restructured things a little bit.  There's not a lot of value to this
+        other than being able to find things more easily.
+    
+    3.  Started factoring out the opcodes.  Currently these are a giant switch
+        statement which is cumbersome and hard to extend.  I'm changing it so
+        that a dispatch vector is created that uses the opcode to locate an
+        object that is the execution mechanism for each statement.  As they 
+        are removed from the switch statement, they reappear as classes in the
+        org.fernwood.jbasic.opcodes package, with each opcode having it's own
+        class to hold the execute() method.  These are dynamically discovered
+        at initialization time, so you just create a new ByteCode._<NAME>
+        definition and add the new class to hold the execution method and 
+        the new instruction is available.
+ 
+    4.  Removed the optional link switches; all execution now requires a linked
+        executable for each program module.
+        
+    5.  Major restructuring called for a significant revision of the version.
+        Re-released a new package on SourceForge to go with the 1.5 update.
+
+]CHANGES 1.5 - 2
+
+    April 26, 2006
+    --------------
+    1.  Allow LOCATE() function to be able to locate substrings in a string as 
+        well as locate values in an array.  In the case of a string, the return
+        value is the offset in the string that could be used with a SUBSTRING
+        function.
+        
+    2.  Added REPLACE() function which will replace a value in a string with 
+        another string.  If the value being replaced does not exist, the string
+        is returned unchanged.
+    
+    3.  Fix bug in SHOW OPTIONS not being handled correctly (jbenv not passed 
+        properly).
+
+]CHANGES 1.5 - 3
+
+    May 4, 2006
+    -----------
+    1.  Significant performance increases in this release.  Removed some 
+        critical-path text case changes that aren't needed in the symbol table 
+        manager, and converted symbol tables from TreeMaps to HashMaps.  
+        
+        It turns out that the only time we really care if the symbols are 
+        in order is for a SHOW SYMBOL TABLE command, so that now does extra 
+        work to order the list, allowing normal inserts to run oodles faster. 
+        
+        Also tweaked FOR-NEXT loop performance a bit to remove some unneeded 
+        object copies and type coercions.  Net effect is about a 70% gain!
+        
+    2.  Updated to 1.5-3 to celebrate the major performance gains.
+
+    May 15, 2006
+    ------------
+    1.  Add new TABLES(), SYMBOLS(), and SYMBOL() functions which query the 
+        symbol table.
+        
+        TABLES( ["start"] )    Returns array list of table names in current 
+                               scope, starting with named table, or LOCAL 
+                               if not given. The list is in the order of most-
+                               local to most-global.
+        
+        SYMBOLS( ["table"] )   Returns array list of symbols in a given table, 
+                               or symbols in LOCAL table if not given.  Note 
+                               that the list of symbols is *not* sorted by 
+                               default.
+                               
+        SYMBOL( "v", ["t"])    Returns record describing symbol V, in table T. 
+                               If no table is given, the LOCAL is assumed.
+                               
+        The point of these is to move towards making more (and eventually all)
+        non-compiled statements really be built-in verbs.  This will be a little
+        more complex for things like SHOW which is a compound verb, but a SHOW 
+        front-end that re-processes the command shouldn't be hard.  The goal of
+        the above new functions is to let me make SHOW SYMBOLS be a built-in 
+        verb rather than an interpreted command.
+
+    2.  Add new OPENFILES() and PROGRAM() functions to describe open files and
+        a given program, respectively.  These support SHOW PROGRAMS, SHOW VERBS,
+        SHOW TESTS, and SHOW FILES commands as built-ins.
+        
+    3.  Renamed the built-in command to XSHOW and created the Show.jbasic file
+        which contains the publicly visible instances of the command verbs.
+
+]CHANGES 1.5 - 4
+
+    May 31, 2006
+    ------------
+    1.  Added binary file IO.  A new file type of BINARY added to the OPEN 
+        statement, and added GET, PUT, and SEEK statements to manipulate the 
+        file.  Binary IO can be done by explicitly naming values and types to 
+        read and write, or by creating arrays of records that define each field
+        in a file and re-using the array in GET..USING and PUT..USING statements.
+        
+    2.  Added GETPOS() function that returns current file position for a binary
+        file. Added TRIM() function for string cleanups, especially now that 
+        strings can be handled as fixed width values in GET and PUT operations.
+    
+    3.  Added first pass at online help for the new statements.
+    
+    4.  Increase revision number to 1.5-4.
+    
+    June 10, 2006
+    -------------
+    
+    1.  Changed array syntax, so it must be specified with [] rather than {}
+        syntax. This makes reading JBasic programs much easier when they 
+        intermix array and record constants.
+    
+    2.  Support SEEK FILE BD, USING ED, P  syntax, which uses the record 
+        definition in ED to calculate an offset to the P-th record.  Records 
+        are 1-based in this mode.
+    
+    3.  Support PUT FILE BD, USING ED, FROM x   where X is an expression that
+        results in a record definition.  That is, a record value is allowed, 
+        or a record constant or expression.  The name fields in the record 
+        definition are used to fetch values from the record expression.
+        
+    4.  Support GET FILE BD, [record definition], AS E.  The record definition
+        can be a USING clause or it can be an explicit definition.  In either
+        case, the resulting data read from the file is constructed into a 
+        record value and stored in E (which can be a variable or an array 
+        reference).  The names from the record definition are used to form 
+        the fields in E.
+    
+    5.  Added SIZEOF() function that works with scalars, arrays, and records.
+    
+    June 15, 2006
+    -------------
+    
+    1.  Added RECORD statement that lets you build record definition arrays
+        using a syntax similar to a PUT statement with an explicit list of 
+        elements.
+    
+    2.  Changed several of the tests (FILE10 and FILE11 in particular) to use
+        the new RECORD statement to simplify defining the record definitions.
+    
+    3.  Added a new GETTING STARTED text file with super-simple quick start 
+        info.
+
+]CHANGES 1.5 - 5
+
+    July 6, 2006
+    ------------
+    
+    1.  Fixed bug where program-only statements like DO or FOR where allowed
+        in command-line mode in a number of cases.
+
+    2.  Restructured the CHANGES help so that HELP TOPICS didn't show each
+        sub-topic, but a HELP CHANGES would show them all.
+    
+    3.  Added support for interrupt handling.  When executed as a console
+        application (rather than in Eclipse), you can use the native interrupt
+        key (typically control-C) to stop a running JBasic program, but not
+        cancel the JBasic session.  INTERRUPT is signaled as a standard error
+        in JBasic, so you can add ON INTERRUPT statements to trap the key and
+        cleanup execution of long-running programs if you wish.
+    
+    4.  Added TABLE field to the record that SYMBOL() returns, so you can know
+        the table that contains the named symbol.
+        
+    5.  Internally restructured parsing design, which improved compilation
+        speed by more than 10%.  Also allowed error reporting during compiles
+        to point to the offending token in an error message report.
+    
+    6.  Quoted strings can contain "escaped" control characters, like "\n"
+        or "\t" and the parser will handle them correctly.  This also allows
+        direct quoting, as in "\"test\"".
+
+
+    July 17, 2006
+    -------------
+ 
+    1.  Allow comparison operators between arrays.  The comparison is first 
+        based on array size; shorter arrays are less than longer arrays.  If
+        the array lengths match, then each member is compared to decide which
+        array is "less" based on having the first item in the array that
+        does not match the other array.  This works recursively, so arrays of
+        arrays can be compared.
+    
+    2.  Allow subtraction from arrays, of either scalar values or another array.
+        For the expression X - Y, all members in array X that are also members
+        of array Y (or match the scalar element Y) are removed from array X.
+        
+        So if X = [1, 2, 3, "Tom", 3, 5, 3]
+        
+        Then X - [2, "Tom"]  results in [1, 3, 3, 5, 3]
+        And X - 3 results in [1, 2 ,"Tom", 5] 
+
+    3.  Changed Eclipse project settings to complain more vocally when Javadoc
+        is missing, at least from public APIs and values.  Added a ton of new
+        comments.
+        
+    4.  Fixed annoying bug where a DATA statement could not have an array
+        constant as the first item, due to an error in the code responsible
+        for checking for implied LET statements.                 
+]CHANGES 1.6
+
+Introduction of the debugger increments us to version 1.6.
+
+   September 1, 2006
+   -----------------
+   
+    1.  Use DEBUG command rather than RUN command to start execution under
+        control of a debugger.  The debugger has full access to the current
+        program symbol table to manipulate (print or set) variables, etc.
+        
+    2.  Add STEP, STEP INTO, and RESUME commands to control program flow
+        when under control of the debugger.
+    
+    3.  Add BREAK AT, BREAK WHEN, BREAK LIST, and BREAK CLEAR to store
+        breakpoints based on location or expression, and to list or remove
+        breakpoints.
+        
+    4.  Added SHOW CALLS to display call stack while in the debugger.
+    
+   September 6, 2007
+   -----------------
+   
+    1.  RUN DEBUG can be used to run a program under the debugger.  The
+        DEBUG command as a prefix will run any command under the debugger.
+        
+    2.  Added STEP RETURN to let a program run until it returns to its
+        caller before returning control to the debugger.
+    
+    3.  Made BREAK WHEN conditions be edge condition breakpoints.  That
+        is, the breakpoint only occurs when the condition becomes true
+        (leading edge) but does not trigger again until the condition
+        has become false and then becomes true again.  This prevents
+        endless breakpoints because "I is still 5".
+    
+    4.  Commands executed in the debugger themselves cannot be debugged,
+        this presents an ugly recursion problem.
+    
+    5.  Updated the HELP info to describe the changes (the user's guide
+        will be updated later).
+    
+    6.  Changed the output format of the DBG prompt that indicates what
+        the next statement is that will be executed.
+ 
+]CHANGES 1.6 - 1
+ 
+    September 19, 2007
+    ------------------
+    
+    1.  Added start on JDBC support, to allow JBASIC programs to be
+        able to usefully interact with database programs.
+
+    2.  The user must create or add to SYS$DRIVERS to contain the 
+        name(s) of the driver classes that are to be used to handle 
+        JDBC work.  This is needed so the JDBC connection manager 
+        knows what to look for.
+
+    3.  Create a driver-specific connection string, and use it as the
+        filename in an OPEN statement, with type of DATABASE.
+
+    4.  A PRINT to the database specifies a statement to prepare and
+        execute.
+
+    5.  A GET statement is used to read the result set data.
+
+    6.  A GET with an explicit record specification (like a BINARY 
+        file) defines the fields to read from the result set, and 
+        what type they are expected to be.
+
+          GET FILE FB, INTEGER ID, STRING NAME
+          
+        would require field names of ID and NAME in the database, and
+        they would become local variables after the GET operation.
+        You can use the AS <record> clause to specify a record to store
+        them in, and you can use the USING clause to specify a record
+        with the field information, just like a BINARY file.
+
+    7.  You can also do a read without knowing in advance what the 
+        field names and types are, by just specifying an AS <record> 
+        clause with no record definition.  This only works on databases
+        which have metadata that contains this information already.  
+        The record is created with a field for each item in the result
+        set row.  You can use the MEMBERS() function to get the names 
+        of the fields under program control.
+
+    8.  The EOF() function indicates if there is more data in the result
+        set.  If true, then a read will result in an end-of-file error.
+        However, a new PRINT statement with a new query will reset this
+        and more result data can be returned.
+ 
+    September 20, 2006
+    ------------------
+    
+    1.  Added idea of DSN shortcuts for database access.  A DSN is a
+        record that must contain either a field "CN" with the full
+        connection string, or fields DRIVER, HOST, and PATH which are
+        assembled by the OPEN statement.  This has the advantage of
+        making it easier to have the user plug in parts of the DSN
+        (usually the path) without doing a lot of string manipulations.
+        A DSN can also contain USER and PASSWORD fields.  A DSN is
+        noted by a file name starting with "@" in the OPEN DATABASE
+        statement; the rest of the string is an expressions containing
+        the DSN, but usually is the name of the record variable.
+        
+    2.  Modified the OPEN statement to make the "FOR" keyword optional
+        as long as a mode keyword is included.  Combined with the optional
+        FILE keyword makes the following equivalent
+        
+            OPEN FILE "X.DAT" FOR OUTPUT AS FOO
+            
+            OPEN OUTPUT FILE "X.DAT" AS FOO
+            
+            OPEN "X.DAT" OUTPUT AS FOO
+    
+    3.  The OPEN statement accepts USER and PASSWORD clauses with string
+        expressions containing the username and password.  These will be
+        overridden by the DSN if there is one.  The username defaults to
+        the current process username if not otherwise given.  
+        
+    4.  The OPEN statement accepts a QUERY clause which is a string
+        expression containing the initial query to send to the database.
+        You can still use a PRINT statement to send additional queries
+        to the database; the GET operation applies to the most recent
+        query given.
+        
+    5.	The FILE keyword in GET is now optional.  This is most helpful
+        for DATABASE operations
+        
+            OPEN DATABASE "@MYDSN" AS FOO QUERY QSTRING
+            GET FOO AS RECDATA
+        
+        This opens the database identified by the DSN, using the query
+        string QSTRING.  Then each GET FOO AS RECDATA statement will read
+        a row from the result set and store in a record called RECDATA.
+    
+    6.  The DSN notation can be passed as a simple variable (or expression)
+        of type RECORD. The OPEN operation detects that it's a record and
+        decomposes the DSN appropriately.   The FBTEST program in the Library
+        has been modified to reflect the newest and simplest syntax. 
+        
+  September 28, 2006
+  ------------------
+    1.  Changed the "pretty print" function in the tokenizer to do a better
+        job formatting statements with special symbols.
+        
+    2.  Add REM statement as a remark/comment.  The tokenizer converts this
+        automatically to the JBasic standard of "//" for comments.
+    
+    3.  Increase version number to 1.6.2 for release purposes.
+]CHANGES 1.6 - 3
+
+   October 12, 2006
+   ----------------
+   
+   1.  Increased version to 1.6-3 to identify version that supports threads.
+   
+   2.  CALL FOO(args) AS THREAD runs program FOO on a new thread.
+   
+   3.  OPEN QUEUE "name" AS f will create a bidirectional thread-safe FIFO
+       pipe between threads.
+       
+   4.  SYS$THREADS is an array that enumerates all threads created by the
+       current thread.  The main prompt is a thread.
+       
+   5.  Added SHOW THREADS to see current process's threads.  Added SHOW
+       QUEUE to see all queues in the process shared among threads.
+       
+   6.  KILL THREAD "name" will attempt to stop a thread.  CLEAR THREADS
+       will delete threads that have already completed.
+       
+   7.  THREAD("name") returns a record describing the named thread which
+       must have been created by this process.  Use SYS$THREADS to get the
+       array of thread name strings.
+      
+]CHANGES 1.6 - 4
+
+   November 4, 2006
+   ----------------
+   
+   1.  Changed byteCode array and runtime data stack from Vector to ArrayList
+       for performance; a Vector is synchronized and an ArrayList is not... both
+       these data structures are private to a thread, so no need to pay the cost
+       of synchronization.  On the 1.4.2 JVMs on both Windows and PPC Mac OS X
+       this resulted in a nearly 20% performance gain.
+       
+   2.  Restructuring functions a bit, with the goal being to eventually support
+       allowing the user to add functions via packages, just as statements are
+       added.  Moved all functions to the new org.fernwood.jbasic.funcs package.
+       
+   3.  Merged compile and runtime operations for a function.  A function now
+       must implement compile(), run(), or both.  The compile() method is used
+       to generate an invocation to the function, and is most often used to
+       create in-lined functions, though some functions (like CIPHER()) use it
+       to post-process function results.  If no compile() method is given, then
+       a generic _CALLF opcode is emitted.  The run() method is what the _CALLF
+       opcode will call at runtime, and must implement the body of the function
+       if it was not completely in-lined.
+   
+   4.  Changed version number to 1.6.4 to identify function restructuring.
+ 
+ 
+   December 13, 2006
+   -----------------
+  
+   1.  Fixed order precedence bug in booleans.  The AND and OR operations were
+       treated incorrectly compared to relational operators.
+   
+   2.  Added some additional TEXT$EXPx tests for expression evaluation testing.
+
+   3.  Added function name cache to accelerate process of finding functions
+       invoked via CALLF, so name method instance lookup through packages
+       happens only on first call, and subsequent calls are single hash lookup.
+       See the SYS$$FCACHE_TRIES and SYS$$FCACHE_HITS for statistics.
+   
+   4.  Fixed bug where user written functions could be deleted or renamed and
+       the function cache didn't keep up correctly.
+       
+   5.  Added EOF and NOTEOF opcode to handle end of file and negated cases.
+   
+   6.  Allow the compiler code to test for a list of tokens such as the FOR
+       statement which tests for either STEP or BY as the token before the
+       increment value.  Previously this was done by either several tests or
+       by first testing for the synonym and then pushing the default token in
+       its place.
+   
+   7.  Fixed bug where $MODE local variable wasn't set right by RUN command.
+   
+   8.  Fixed range check bug in CARD function.  Fixed numerous bugs in PATH 
+       functions that prevented it from working reliably in other than the
+       current directory path location.
+   
+   9.  RENUMBER command allow FROM and BY keywords for clarity; i.e you can
+       use "RENUMBER FROM 1000 BY 100".
+       
+   10. Allow RETURNING as a synonym for RETURNS in the CALL and EXECUTE 
+       statements.
+   
+   11. Allow either comma or semicolon to follow file designations and prompt
+       strings on PRINT, PUT, INPUT, and LINE INPUT statements.
+  
+   12. Allow "<-" in place of "=" in LET statement, to emulate TI calculator
+       BASIC dialect.  So you can say "X <- 55" and it means assign 55
+       to X.
+   
+   13. Changed internal storage object for function arguments from a Vector
+       to an ArrayList for performance reasons.
+   
+   14. More JavaDoc cleanup so the class and method descriptions are more
+       complete and use fewer default stubs.
+
+   December 14, 2006
+   -----------------
+   
+   1.  Significant (20% or so) performance gain in benchmark program by
+       dramatically reducing the number of times that an object gets
+       cloned.  Most expressions now use _LOADREF rather than _LOAD, and
+       opcodes that pop an item on the stack intending to modify it in
+       place now use env.popForUpdate() which handles making sure that 
+       items are cloned if they were originally references to symbols.
+   
+   2.  Array and record constants can be pooled in the program, if the
+       symbol SYS$STRUCTURE_POOLING is true (on by default).  Constants
+       are moved the start of the program and stored in temporary symbol
+       elements in the local table.  Each instantiation of the constant
+       is then converted to a _LOADREF of the temporary.  This has a
+       big effect on array and record constants that appear in a loop.
+       Note that this is done when SET POOLING is turned on, which is
+       off by default while I make sure this works in all cases. The 
+       pooling also does not happen except in a loop, and with a structure
+       that is non-empty, since there are no performance gains in those
+       cases.
+   
+   3.  Added a better message when a numeric line number is used in a
+       GOTO statement.  This syntax isn't accepted in JBasic (which uses
+       line numbers solely for organizing program statement order), so the
+       message indicates that the user must use a text label instead.
+   
+   4.  Fixed a bug where changing the program declaration statement (the
+       first line of the program) did not correct set the current program
+       name.  This meant you could change the name of the program and then
+       type RUN and it would not locate the program correctly.  This is now
+       fixed.
+       
+   5.  Changed LINK so that it it always unlinks, recompiles, and links the
+       program, even if it was already linked.  This makes it easier to test
+       things like SET [NO]POOLING by changing the option, issuing a LINK, 
+       and then DISASMing the program again to see the changes.  Previously
+       a LINK on an already-linked program was ignored.
+   
+   6.  Fixed a bug where VERB and FUNCTION modules loaded from a workspace
+       or demand-loaded from a file were not renumbered on load (this was
+       done correctly for PROGRAM objects already).
+       
+   7.  When a program object (PROGRAM, VERB, or FUNCTION) is loaded from a
+       file, now all blank (empty) statements at the end of the program are
+       now removed.  Previously, blank lines in the workspace or text files 
+       between programs were being added to the end of the previous program.
+ 
+   January 4, 2007
+   ---------------
+   
+   1.  Removed unnecessary synchronization operations from symbol table; only
+       the ROOT table needs to be synchronized since it is the only one that
+       is shared among threads.  Use the insertSynchronized() method on the
+       root table if you need to write to it.
+       
+   2.  Modified JBasic-visible status to be a record with a CODE and PARM
+       field, and a boolean STATUS field.  SYS$LAST_SIGNAL is now called 
+       SYS$STATUS, and is set after every statement where there is a failure.
+       
+   3.  The ON-GOTO statement no longer sets up an ERROR$CODE, ERROR$ARG, and
+       ERROR$MSG value since the ON-code can just get them directly from the
+       SYS$STATUS value.  Obviously this means that if the ON statement gets
+       an error before it accesses these values, they will be lost/superseded
+       by the new error values.
+       
+   4.  Modified tests ERROR1 and ERROR2 to accommodate the above changes.
+  
+   5.  Modified EXECUTE "statement" RETURNS STS to return a status record
+       (a copy of SYS$STATUS, actually) in the return field rather than a
+       formatted message.
+       
+   6.  Changed the MAIN program in Library.jbasic to use the new status
+       field SUCCESS to determine if the statement executed successfully.
+       
+   7.  The SYSTEM statement now sets SYS$STATUS with a standard status value
+       where the code is always "*SYSTEM" and the PARM field contains the
+       numeric return code from the shell process.
+   
+   January 10, 2007
+   ----------------
+   
+   1.  Allow function results to participate in dereference expressions.  That
+       is, if a function returns a complex object like an array or record, the
+       expression can immediately dereference that without using a temporary
+       storage variable. 
+       
+       Previously, you had to write code like this:
+       
+            X = FILETYPES(".")
+            Y = X[1].NAME
+       
+       This gets the name of the first file in the directory ".".  You had
+       to use a temporary variable (X in this example) to hold the result
+       which returns an array of records.  Now you can use the simpler:
+       
+            Y = FILETYPES(".")[1].NAME
+       
+       Of course, if you do this in a loop you should still use a temporary
+       variable to hold the FILETYPES array since that call will be made to
+       re-acquire the list of records each time FILETYPES() is used in an
+       expression.
+   
+   2.  Allow signed string constants.  That is, -"TOM" is really "MOT", using
+       the operation of the NEGATE operator on strings to reverse the string.
+       Previously signed constants had the sign ignored.
+   
+   January 16, 2007
+   ----------------
+   
+   GWBASIC compatibility tweaks.  There are some things that we won't be
+   able to make be "just like GWBASIC" but this gets us a little closer,
+   for improved compatibility.
+       
+   1.  CLOSE with no arguments closes all open (user mode) files
+   
+   2.  END closes all user mode files, and terminates all active program.
+       This returns control to the console if in interactive mode, or
+       terminates the run() method if invoked from another program.
+   
+   3.  HEX$() and OCT$() functions added.
+   
+   4.  ? is allowed as a verb, and is aliased to PRINT.  Along the way,
+       fixed a bug in empty record constants.
+
+]CHANGES 1.6 - 5
+
+   January 20, 2007
+   ----------------
+   1.  Allow line numbers in GOTO statements and IF statements.
+   
+   2.  Handle RENUMBER operations to re-map line numbers found in the
+       above statements.
+   
+   3.  Changed version number to 1.6.5 to denote line number support.
+
+   4.  Allow line numbers in GOSUB statements.
+   
+   January 25, 2007
+   ----------------
+   1.  Added STOP command, which when placed in a program, stops the
+       current program, displays the SYS$STOP_MESSAGE message, and
+       drops into the debugger.  This lets programs use STOP in a fashion
+       similar to older BASIC languages where you could resume the program
+       after inspecting/modifying variables, etc.
+   
+   February 6, 2007
+   ----------------
+   1.  Fix bug with "implicit NEW".  When you start entering program text
+       when you first start JBasic, if there isn't a current program a NEW
+       command is executed for you.  This wasn't working right, the required
+       PROGRAM statement was not being created.
+ 
+   2.  SYS$GWBASIC now controls GW-Basic compatibility. It defaults to true.
+       GW-Basic's OPEN syntax is now supported.
+   
+   February 20, 2007
+   -----------------
+   1.  Support GWBASIC RND pseudo-variable, which produces a 16-bit signed
+       integer random number.  Also support the RANDOMIZE statement which
+       seeds the RND variable.  Using the same seed guarantees the same sequence
+       of pseudo-random numbers each time the variable is accessed.  
+       
+       With this feature, you cannot use RND as an LValue when in GWBASIC
+       compatibility mode.  You can access the RND pseudo variable by calling
+       the RNDVAL() function even if GWBASIC emulation mode is disabled.
+  
+   2.  Added support for the pseudo-statement MID$() which supports string
+       insertion into existing string objects.  If A$ is "ABC" then the
+       statement   MID$(A$,2,3)="NT" results in A$ containing "ANT".
+    
+   3.  Added COMMON statement to support declaring variables in a "COMMON"
+       space.  Such variables are preserved across CHAIN operations.  You
+       can specify COMMON in the attributes area of a LET statement as well
+       as in the COMMON statement itself.
+          
+   4.  Added CHAIN statement to allow coroutine transfer to another program
+       in the workspace.  COMMON variables are copied to the new program's
+       symbol table before it is run.  CHAIN statements do not return to the
+       program that initiates them, but instead return to the program's caller.
+       CHAIN can optionally specify a line number to transfer control to in
+       the chained-to program.
+
+]CHANGES 1.6 - 6
+
+    March 14, 2007
+    --------------
+    1. Changed version ID string to 1.6-6 to track new GWBASIC features and
+       updated object support.
+       
+    2. Allow container association to be defined at object creation time.
+    
+           X = NEW(MYCLASS) OF MYCONTAINER
+           
+       This creates a new object of class "MYCLASS" that has a container
+       association with MYCONTAINER; that is, "x" is considered to be
+       contained in "mycontainer".  The meaning of container association is
+       up to the programmer; however, it controls object field resolution
+       as defined below.
+       
+    3. Fixed bugs in object field references, so OBJ->FIELD will search
+       the container association to locate FIELD if it is not found in
+       OBJ itself.
+    
+    4. Changed the format of objects slightly.  Previously, objects were
+       records with fields like OBJECT$CLASS and OBJECT$ID as well as user-
+       supplied fields.  Now, there is a single field in the record called
+       _OBJECT$DATA which is itself a record containing all the object data.
+       This prevents the object data from showing up in a MEMBERS() result,
+       for example.
+       
+    5. Fixed bugs in object copy when there were recursive field definitions.
+ 
+ 
+    March 29, 2007
+    --------------
+    1. Numerous bug fixes in JBasic objects, particularly with unresolved
+       container fields or method names.
+    
+    2. Any field in a record with a leading underscore in the name is
+       considered invisible and won't be displayed in a PRINT operation
+       or counted in a LENGTH() or MEMBERS() function.
+
+    3. The object data record stored in an object is called _OBJECT$DATA
+       so that becomes invisible.
+
+    4. The ISOBJECT(x) function is added which reports if the value x is
+       an object or not.
+
+    5. The OBJECT(X) function returns the object data record.  You can give
+       an optional field name, as in OBJECT(X,"class") which returns the
+       class value for the object.
+
+    6. You can specify the superclass in a class declaration with the keyword
+       SUPERCLASS instead of a colon if you wish:
+
+           CLASS MANAGER SUPERCLASS EMPLOYEE ( SALARY AS FLOAT...)
+
+    7. Fixed bug in method invocation when the method name is explicitly
+       given in the class as a member of the _OBJECT$DATA.METHODS record.
+       Each field has a name which is the method and a string value which
+       is the actual program to call when the method is invoked.
+
+
+    April 5, 2007
+    -------------
+    
+    1. Changed format of TIME command output slightly to add additional
+       information regarding instructions/second and average instructions
+       per compiled statement.
+    
+    2. Performance speed-up for record object field references.  This
+       was a TreeMap; no need for the maintenance of the field names
+       in sorted order.  This is how a HashMap, and a new method for
+       Values was created, recordFieldNames() which returns a vector
+       in sorted order of the field names.  This is only required for
+       printing an object or for returning the MEMBERS() field data.
+    
+    3. Minor performance tweaks in Value object handling and in the
+       handling of stack arguments and default return codes in some
+       of the opcode execution handlers.
+       
+       There was a resulting net increase of less than 10% for changes
+       #2 and #3 above in the default benchmark test.  It is probably
+       time to create a new benchmark that flexes more of the system.
+ 
+]CHANGES 1.6 - 7
+
+    April 15, 2007
+    --------------
+    
+    1. Added compound statements.  You can use a ":" character to 
+       put more than one statement on a line.  This also works in
+       IF-THEN-ELSE statements to have more than one statement in
+       the THEN or ELSE element of the statement.
+       
+       NOTE: Compound statements do not work with statements that are
+       not compiled.  So you cannot use SHOW STATUS : SHOW FILES on
+       a line, unless the interpreter for the statement knows how to
+       handle the colon character.  This limitation is not likely to
+       be removed since the ":" is handled by the compiler only.
+       
+       This means that all statements really need to compile
+       even if it is to a utility bytecode, such as _SHOW to handle
+       the various SHOW commands.  The key is that they must be completely
+       parsed at compile time and converted to bytecode information
+       for the compound statement mechanism to work.
+    
+    2. Allow REWIND to specify a line number or label to which the
+       READ operation is rewound.  A side effect of this means that
+       DATA statements now appear in the debugger as statements, 
+       though there is nothing done when they are executed.
+       
+    3. Disallow reserved words to be used as statement labels; it was
+       playing havoc with compound statements.
+    
+    4. Update the online HELP text and the user's guide PDF file.
+    
+    5. Fix bug in handling of statements with more than one line
+       number, such as IF..THEN..ELSE with GOTO statements in each
+       clause.  Previously only one line number was allowed per
+       statement; this now can be a list of line numbers internally.
+ 
+    6. Allow multiple assignments in one LET statement, executed in 
+       left-to-right order.  For example, the following sets the 3rd
+       element of the array Y to "BOB"
+    
+           LET X=1, X=3, Y[X]="BOB"
+           
+    7. Update revision to 1.6-7.
+    
+    
+    April 18, 2007
+    --------------
+    
+    1. Fixed an outstanding problem with compound statements where
+       there is a line number reference after the first statement.  The
+       line number vectors for the compound statement elements need to
+       be concatenated into the first statement's vector, suitably offset
+       from their location in the expression of the compound statement.
+    
+    2. Fixed a problem where insert and delete of ByteCodes during optimization
+       was not updating the label->line number map, which meant that GOTO and
+       GOSUB with the USING() clause did not always work correctly.
+  
+    3. Add automatic indenting for FOR..NEXT, DO..WHILE, etc. loops in LIST
+       command output. SYS$INDENT is the number of spaces to indent; default
+       is 2 if not given.
+
+    4. DEBUG with no command is now the same as DEBUG RUN, and initiates
+       debugging of the current program.
+       
+    5. SYS$LABELWIDTH controls spacing of listings (how much width is given
+       before the statement text for optional labels on the same line). The
+       default is 10 (was 17 before, this makes a "tighter" listing).
+       
+    6. Fixed bug where duplicate labels where not detected and the last
+       label in the program was the only one used.  Now the linker complains
+       when a label is used more than once, so the error will be reported
+       when the program is first RUN.
+    
+    
+    April 22, 2007
+    --------------
+    
+    1. Allowing program names to be used as symbols has become problematic;
+       there are too many times/ways that I find I am colliding with names.
+       There are also very few reasons why a program object itself needs to
+       ever be manipulated.  
+       
+       So I've removed support for Value objects of type PROGRAM, and instead
+       updated the PROGRAM() function to accept an optional second argument
+       which is the relative line number in the file to return as a string.
+       
+       This lets things like the FIND verb (implemented as a JBASIC program) 
+       scan over the program text.  As a convenience, you can also use the 
+       record member LINES in the PROGRAM() result which is a string array 
+       containing all the lines of the program.  This is now how FIND gets 
+       the array of strings to search.
+       
+    2. Allow a program to add additional external functions to JBasic by
+       using JBasic.addPackage() to define the containing packages and
+       then writing suitable subclasses to the JBasicFunction class with
+       a run() method to be executed by the _CALLF bytecode.
+       
+    3. SHOW SYMBOLS (or SHOW SYMBOL TABLE) will now show all symbol tables
+       up to but not including the global table.  That is, you will see all
+       the symbol tables active for your program that contain user-created
+       symbols.
+       
+       Too often I wanted to see all the program symbols, but not the raft
+       of global symbols.  There you have it.  Sometimes, that's why we 
+       change things.
+    
+    4. SHOW CALLS displays the text of the statement at each line, as opposed
+       to just the line number.
+    
+    May 20, 2007
+    ------------
+    1. Fix problem with bad USING strings not being reported correctly, either
+       for inappropriate data types or insufficient format specifies to match
+       data being printed.  New FORMATERR message created.
+
+    2. Small performance tweak to BR operation.
+]CHANGES 1.7
+
+
+
+    May 29, 2007
+    ------------
+    1. Let's start accumulating changes as the 1.7 release.  Modified version
+       number accordingly.
+
+    2. SAVE now only saves the current program, and requires a file name.  The
+       SAVE WORKSPACE command will save all programs in the workspace.  SAVE 
+       is now implemented as a BYTECODE so that better compile-time syntax 
+       errors get generated.
+
+    3. LOAD and SAVE commands will add a ".jbasic" extension to file names if
+       none is given.
+
+    4. LOAD will add a PROGRAM statement to the first line of a LOAD program
+       if there isn't one already, using the base name of the load path.
+
+    5. Added FILEPARSE(), BASENAME(), PATHNAME(), and EXTENSION() functions.
+
+    June 4, 2007
+    ------------
+    1. Added InputProcessor class to handle "compiled" format specifications
+       to scan text buffers using the specifications. An abstract InputFormat
+       class describes input formats, and subclasses are created to define 
+       each individual in-format (INTEGER, DOUBLE, SKIP, POS, etc.)
+    
+    2. The INPUT(format, buffer) function accepts a format specification and
+       a string input buffer, and returns an array of values parsed from the
+       buffer using the format specification.
+       
+    3. The INFORMAT statement allows the creation of input format specs, which
+       are arrays of records describing each operation.
+       
+           INFORMAT name AS format-spec [, format-spec...]
+       
+       Each "format-spec" is an in-format identifier, optionally followed by
+       format details in parenthesis.  This can be in the form (x.y) which 
+       specifies a length and scale, or (*) or (*.y) which indicates varying
+       length input and a scale, or ("string") which gives a string to use to
+       supplement the format data.
+       
+    4. Added TEST$INFORMAT1 which demonstrates and tests this basic function.
+    
+    TO-DO
+    -----
+    1. Add in-formats for common data types.
+    
+    2. Add in-formats for positioning at absolute column positions.
+  	
+    3. Add a few demonstration in-formats for unusual data types.
+
+    4. Add user-written in-format capability so a calling program can provide
+       it's own Informat objects if they are properly constructed to handle
+       application-specific data types.
+  	
+  	June 11, 2007
+  	-------------
+    1. Added expression functions, such as
+  	
+          DEFFN DBL( X ) = X * 2
+  	   
+       This writes a function X that returns the given expression, so the
+       function is available for use anywhere.  The function can use any
+       expression, including accessing variables not in the scope of the
+       current function.    
+  	
+  	June 18, 2007
+  	-------------
+    1. Created locally scoped functions, so functions created by DEFFN are
+       not visible outside the program from which they are run.  The optimizer
+       detects when a CALLF is made to a locally defined function and uses
+       the CALLFL instead to specify a local function call.
+  	
+    2. Local functions are defined as bytecode streams that are attached to
+       the Program object.  DEFFN no longer writes a text function that is
+       visible to any other program, but instead directly generates a byte
+       code stream stored as a local function.
+  	   
+    3. ByteCode objects now have a call() method that calls them as functions
+       directly, simplifying the work to call a local function stream.
+  	   
+    4. SHOW PROGRAM(DISASM) will dump local functions that are attached to
+       the current program.
+  	   
+    5. Fixed a bug in SKIP("string") information specification that caused an
+       endless loop of the target string wasn't at the next character position
+       in the buffer.
+]CHANGES 1.7 - 1
+
+  	June 21, 2007
+  	-------------
+  	
+    0. Start accumulating fixes/changes in new minor release 1.7-1.
+    
+    1. Fix bugs in the DEFFN implementation; the lifetime of the local 
+       function code was not managed properly when a program was edited.  
+       Now the DEFFN code is emitted in-line and collected up at link 
+       time into the local function pool.
+  	
+    2. Added AUTOCOMMENT, AUTORENUMBER, GWBASIC_EMULATION, and TIMEGC
+       to the SET options list.  
+  	   
+    3. Changed SET to be a compiled rather than executed statement.
+ 
+    June 23, 2007
+    -------------
+    1. Changed DISASM output to not print out the local function 
+       disassembly since that is implicitly visible in the _DEFFN 
+       area of the bytecode, but rather just list the local functions 
+       and their bytecode size.
+    
+    2. Created Utility class that will hold general utility functions.
+       For example, added pad(str,len) which pads a string to a given 
+       length with blanks.  Modified SHOW statement handler to use this 
+       new function.
+ 
+    3. Continued the (tedious) process of adding useful Javadoc to the 
+       opcodes that describe the correct use and operation of each 
+       bytecode.
+
+    4. Performance optimizations made to _CALLFL local function 
+       invocation.
+
+    July 12, 2007
+    -------------
+    1. Fixed bug in handling of unary negation which was not working 
+       correctly with complex expression atoms, such as -sum(x,y).  
+       Added optimizations to correctly detect _NEGATE or _NOT after 
+       a constant and just modify the constant properly in the bytecode
+       stream and remove to negation.
+       
+    2. Added optimization to remove _CVT 21 before _OUT and _OUTNL. 
+       This means we don't explicitly convert to a FORMATTED_STRING 
+       but instead use the toString() method for a value.  I think 
+       the result is the same, but be on the watch for formatting 
+       errors that crop up from this change to see if we really do 
+       need the FORMATTED_STRING value...
+    
+    3. Added FOR index = v1 [, v2 [,v3...]] syntax that assigns each 
+       element in the list in turn to the index variable.  If the 
+       element is an array, each member of the array is assigned to 
+       the index in turn.  This is implemented in part by extending 
+       the LoopControlBlock object and by creating a new _FOREACH 
+       bytecode.
+    
+    4. Fixed bugs in toString when given an array or record.
+ 
+    5. Allow FOR .. DO statement  which executes "statement" in a 
+       loop with an implied NEXT.  This is the only form of a 
+       FOR statement that can be executed as a command.  
+       For example,
+       
+           FOR I = TABLES() DO PRINT "Table="; I
+           
+       will print the names of each symbol table.  There is no NEXT 
+       clause used in this case; it is implied.
+ 
+    July 18, 2007
+    -------------
+    1. Allow SORT() function to accept a list of arrays or scalar 
+       values in the parameter list, all of which are sorted together.
+       They still must all be the same base type (string, numeric, 
+       etc.)
+    
+    2. Fix miscellaneous bugs in parsing FOR..EACH..DO clauses.  
+       Also made small performance improvement in generated code 
+       (eliminating unneeded _SWAP).
+       
+    3. Allow LOWER() and UPPER() to accept an array of strings to 
+       process as well as a single string value.  If an array is 
+       given, only the strings are modified.
+    
+    4. Modified a few of the builtin programs like HELP, TEST, and 
+       JAVA to use the new FOR..EACH syntax and other recent syntax 
+       improvements.
+       
+    July 29, 2007
+    -------------
+    1. RANDOMIZE is now a compiled statement, supported by the _RAND 
+       bytecode.
+    
+    2. Minor fixes so LINK and UNLINK allow program type prefix, as in 
+    
+                 LINK VERB DEAL   or    UNLINK TEST RANDOM1
+    
+    3. Minor fix in SET statement compile operation to allow a compound
+       statement following the SET statement.
+    
+    4. Code generation improvements for OPEN statement to eliminate 
+       temporary variable creation.
+    
+    5. Allow CLOSE ALL FILES to mean close all open user files.  If in
+       GWBASIC compatibility mode, this is the same as CLOSE with no 
+       arguments at all.
+    
+    August 26, 2007
+    ---------------
+    1. Fix bugs in handling of math errors during optimization.  Now if
+       a math error occurs, the optimization is stopped and we let the 
+       regular runtime exception handler catch it.
+    
+    2. Fixed poor handling of java.lang.ArithmeticException errors, 
+       which were printed as raw Java errors.  These are now generated 
+       as MATH errors in JBasic, and the parameter is the detailed reason.
+       
+    3. Minor cleanup to the JAVA built-in verb to take advantage of 
+       better performing syntax.
+       
+    4. Misc error handling improvements for INPUT, DIM, DELETE, SIGNAL
+       EXECUTE, MESSAGE and CHAIN statements.
+    
+    5. Allow CHAIN to specify the line number as an expression instead 
+       of only as an integer constant.
+    
+    6. LET can specify a data type directly in the statement without 
+       using internal casting functions.
+       
+           LET X = 3+5 AS STRING
+           
+       The trailing "AS <type>" adds a conversion operation to the 
+       expression. Note that this is identical in function to    
+        
+              LET X = STRING(3+5)
+       
+    7. INPUT and LINE INPUT can specify a data type after the input 
+       variable term(s), as in
+       
+       		INPUT "Your name and age?", NAME AS STRING, AGE AS INTEGER
+       		
+       This coerces the data type of NAME to be a string and AGE to be an 
+       integer regardless of the actual user input.
+ 
+    8. Fix bugs in DATA statement; the optimizer would corrupt the lenght
+       of the data stream encoded as the operand to the _DATA instruction;
+       this has been corrected.  This means that expressions now work 
+       properly in DATA statements, though expressions that use variables 
+       may have complex and possibly unwanted side effects, since the 
+       values in the expression are evaluated at READ time.
+       
+    August 27, 2007
+    ---------------
+    1. Add type-specific declarations for INTEGER, STRING, DOUBLE, and
+       BOOLEAN.  Syntax is the same for all after the initial verb, with
+       INTEGER being used as the example here:
+       
+           INTEGER XX=35, YY="BOB", ZZ, QQ=Y+3
+           
+       Each comma-separate element is created/coerced to be an integer.
+       It is given a default value (like ZZ in the above example) or the
+       value of the expression.  Regardless of the expression type, the 
+       value will be converted to the given type, such as INTEGER in this
+       case.  The value can be an arbitrary expression.
+
+    2. Fixed recursion so program state is preserved across nested run() 
+       method calls.
+]CHANGES 1.7 - 2
+
+    September 1, 2007
+    -----------------
+    1. Start on next incremental revision 1.7-2
+
+    2. Fix bug where in some cases the register array at runtime is not
+       initialized and _STORREG fails when MID$() is used.
+    
+    3. Removed pre-1.7 release notes (about 64k of text) to a separate
+       file CHANGES-ARCHIVE.TXT in the project folder.  This will reduce
+       the executable jar file size and make it easier to focus on recent
+       changes.  Also made minor edits to the GETTING-STARTED.TXT file.
+ 
+    4. Minor improvements in error reporting for mismatched DO loops, the
+       RENUMBER and DEFFN statements, and...
+    
+    5. Fix (partially) bug in RENUMBER that would delete trailing comments.
+       However, I suspect this is still a problem for a program saved with
+       trailing comments that you wish to reload.
+    
+    September 15, 2007
+    ------------------
+    1. Allow CALL..RETURNS to specify an arbitrary LVALUE rather than 
+       just a simple variable name.  Allow RETURNS() syntax.  Improved 
+       error messaging for mismatched parenthesis and other bad CALL 
+       syntax.
+       
+    2. Fixed bug in deleting bytecodes that occur after a label in a 
+       program.
+    
+    3. PROTECT now strips _STMT and _DEBUG opcodes for speed and security.
+    
+    4. PROTECT ALL PROGRAMS can now be used to protect all programs in 
+       the current workspace.
+    
+    5. SHOW MEMORY now gives a concise summary of memory use.  This is 
+       also now part of the SHOW [STATUS] command.
+     
+    6. Add SPELL() function that spells out numbers as text.  Currently
+       supports only EN(English) and FR(French) localization languages.
+    
+    7. Allow SET NOPROMPTMODE to turn off the prompting for each line of 
+       input.  This behaves similarly to very old dialects of BASIC which
+       only put out a prompt after output not directly generated from an
+       immediate mode PRINT command.  For example, you are not prompted 
+       between each line of program input, but are after a SHOW or RUN 
+       command.
+
+    8. Fixed array definitions in  declarations such as INTEGER X[3]=55
+       which now correctly generates an array of three integers each of 
+       which has the initial value of 55.  ARRAY BOB[3] creates an array
+       of three arrays.
+       
+    October 1, 2007
+    ---------------
+    1. Add SANDBOX mode which disables operations to the external system 
+       that could compromise security.  Unfortunately this also disables
+       the HELP command, which requires external file IO, but this seems
+       to be a reasonable compromise.  You can SET SANDBOX in program 
+       mode to enable this secure mode (there is no SET NOSANDBOX 
+       command). You can also use the enableSandbox() method on a JBasic 
+       object to explicitly set or clear this mode when using it as an 
+       embedded jar.
+       
+    2. First pass at adding command-line switches to the invocation, 
+       suitable for use in controlling the behavior of the session.  
+       These are not all working correctly yet, though.
+       
+       -nows      No workspace is loaded
+       -sandbox   The session starts up in sandbox mode
+       -nomain    The MAIN program is not run
+       -noprefs   The $PREFERENCES program is not run
+       -noshell   A command line shell is not started
+       -cmd "x"   The command "X" is run at startup.
+       
+    3. ASCII() and CHARACTER() operate on full strings.  If ASCII is 
+       given a string with a single character it returns an integer.  
+       But if the string is more than one character it returns an 
+       array of integers. Conversely, an array of integers passed to 
+       CHARACTER() will result in a multicharacter string as a result.
+    
+    4. MIN() and MAX() will work with arrays in the argument list, and
+       will return the smallest or largest value in any of the array(s)
+       passed, including nested array values.
+       
+    5. Array will flatten arrays passed as parameters.  For example,
+    
+          X = ARRAY( 1, 2, [ 3, [ 4, 5, 6 ], 7])
+          
+       will return an array of [1, 2, 3, 4, 5, 6, 7] with all members
+       made sequential members of the result set in the order 
+       encountered.
+
+    6. Fixed a problem where TIMECODE() was a compile time function 
+       only which meant that the resulting time code was fixed when the 
+       statement or program containing it was compiled rather than run.

@@ -1,0 +1,323 @@
+//
+//	ELIZA - based on the ideas behind dozens or hundreds of similar programs,
+//          all owing their origins to Joseph Weizenbaum of MIT.
+//
+//	This is possibly LAME!  Just tinkering around here.  But it's a way to 
+//  torture some of the string handling functions and such.  I'll keep adding 
+//  to this when I have a little time.
+//
+//  Version 1.4 - Tom Cole, June 2009    Convert edit map to a data table.
+//                                       Allow data to be stored as XML
+//                                       file via SAVE DATA and reloaded via
+//                                       LOAD DATA
+//
+//  Version 1.3 - Tom Cole, March 2009   Used line continuation to make the
+//                                       data table with response phrases
+//                                       a little more readable.
+//
+
+		verb ELIZA		
+		
+		if length($args) > 1 then 
+		   print "The ELIZA command does not accept arguments"
+		   return
+		end if
+
+		
+		print "Hello, I am ELIZA. How are you feeling today?"
+		xmlname = "ElizaResponseMap"
+		
+		// Load the initial response map from local DATA.  This gives a
+		// minimum set of responses, even if augmented by a LOAD DATA
+		// later.
+		
+		map_ptr = 0
+		map = []
+		do while !eod()
+		   read pair
+		   map[++map_ptr] = pair
+		loop
+		
+		// Create initial replace map for inverting pronouns, etc.
+		
+	    replace_map = []
+		replace_map = replace_map + [{from:" MY ", to:" YOUR+ "}]
+		replace_map = replace_map + [{from:" I ", to:" YOU+ "}]
+		replace_map = replace_map + [{from:" YOU ", to:" I+ "}]
+		replace_map = replace_map + [{from:" YOUR ", to:" MY+ "}]
+		replace_map = replace_map + [{from:" ME ", to:" YOU+ "}]
+		replace_map = replace_map + [{from:" YOURSELF ", to:" MYSELF+ "}]
+		replace_map = replace_map + [{from:" MYSELF ", to:" YOURSELF+ "}]
+		replace_map = replace_map + [{from:" YOURS ", to:" MINE+ "}]
+		replace_map = replace_map + [{from:" MINE ", to:" YOURS+ "}]
+		replace_map = replace_map + [{from:" CANT ", to:" CANNOT "}]
+		replace_map = replace_map + [{from:" WONT ", to:" WILL NOT "}]
+		replace_map = replace_map + [{from:" ARENT ", to:" ARE NOT "}]
+		replace_map = replace_map + [{from:" WOULDNT ", to:" WOULD NOT "}]
+		replace_map = replace_map + [{from:" ISNT ", to:" IS NOT "}]
+		replace_map = replace_map + [{from:" WASNT ", to:" WAS NOT "}]
+		replace_map = replace_map + [{from:" DIDNT ", to:" DID NOT "}]
+		replace_map = replace_map + [{from:" IM ", to:" YOU ARE+ "}]
+		replace_map = replace_map + [{from:" IVE ", to:" YOU HAVE+ "}]
+		
+		if length($ARGS) = 1 then 
+		   text = "LOAD DATA " || quote($args[1])
+		   goto parse
+		end if
+		
+loop:	line input text
+		text = uppercase(text)
+
+parse:
+		tokens = tokenize(text)
+		has_file_name = false
+		
+		if length(tokens) > 1 then 
+		   cmd = tokens[1].spelling + " " + tokens[2].spelling
+		   if length(tokens)>2 then 
+		      if tokens[3].kind = "STRING" then 
+		         has_file_name = true
+		      end if
+		      fn = tokens[3].spelling 
+		   else 
+		      fn = ""
+		   end if
+		else
+		   fn = ""
+		   cmd = ""
+		end if
+	    if fn = "" then fn = "Eliza.data", has_file_name = true
+		
+		if cmd = "SAVE DATA" then
+		    
+		    if not has_file_name then print "Missing quoted file name" : goto loop
+		    open output file fn as #1
+		    print #1; xml({ responses:map, edits:replace_map}, true, xmlname)
+		    close #1
+		    print "(DATA SAVED TO \""; fn; "\")"
+		    goto loop
+		end if
+		    
+		if cmd = "LOAD DATA" then
+		    if not has_file_name then print "Missing quoted file name" : goto loop
+		    open input file fn as #1
+		    input #1; xml_data as xml(xmlname)
+		    close #1
+		    
+		    new_map = xml_data.responses
+		    
+		    for i1 = 1 to length(xml_data.edits)
+		        f = 0
+		        for i2 = 1 to length(replace_map)
+		           if replace_map[i2].from = xml_data.edits[i1].from then f = i2
+		        next i2
+		        if f = 0 then replace_map = replace_map + xml_data.edits[i1]
+		    next i1
+		    
+		    for i1 = 1 to length(new_map)
+		    
+		       t = new_map[i1].test
+		       f = 0
+		       for i2 = 1 to length(map)
+		           if map[i2].test = t then f = i2
+		       next i2
+		       
+		       if f = 0 then 
+		          map = map + new_map[i1]
+		       else
+		          map[f].say = map[f].say + new_map[i1].say
+		       end if
+		          
+		    next i1
+		    
+		    print "(DATA LOADED FROM \"";fn;"\")"
+		    goto loop
+		end if
+		    
+//
+//	Remove apostrophes
+//
+
+del_apos:
+		old_text = text
+		text = text - "'"
+		if text <> old_text then goto del_apos
+
+//
+//	Search for introductory text matches
+//
+
+		if left(text, 5) = "WELL," then text = substring(text,6)
+		if left(text, 4) = "YES," then text = substring(text,5)
+		if left(text, 3) = "NO," then text = substring(text,4)
+		
+		map_ptr = 1
+		
+next_pair:
+		if map_ptr > length(map) then goto guess
+		pair = map[map_ptr++]
+		
+		
+		test_len = length(pair.test)
+		if left(text, test_len) = pair.test then goto found
+		
+		if left(pair.test,1) <> "*"  then goto next_pair
+		if locate(substring(pair.test,2), text) > 0 then goto found
+		
+		goto next_pair
+		
+//
+//	Use what's left of the text and munge it for possible use
+//	in the output message.
+//
+found:	
+		output = pair.say
+		if type(output) <> "ARRAY" then goto has_sub 
+		idx = integer(random(length(output)))+1
+		output = output[idx]
+		
+has_sub:
+		if locate( "*", output) = 0 then goto output
+		rest = " " || right(text, length(text)-test_len) || " "
+
+		
+//
+//	Substitute words as needed
+//
+
+		for idx = 1 to length(replace_map)
+		    rest = replace( rest, replace_map[idx].from, replace_map[idx].to)
+		next idx		
+		
+del_again:
+		old_rest = rest
+		rest = rest - "+"
+		if rest <> old_rest then goto del_again
+		
+		output = trim(replace( output, "*", rest ))
+		output = replace( output, "??", "?")
+		output = replace( output, "  ", " ")
+		output = replace( output, " ?", "?")
+		
+output:
+
+		print output
+		if output = "GOODBYE." then end
+		goto loop
+
+guess:  pair.say = ["*?",\
+					"INTERESTING.", \
+					"WHAT DO YOU MEAN BY SAYING *?", \
+					"TELL ME MORE...", \
+					"REALLY?", \
+					"I DO NOT UNDERSTAND."]
+					
+		test_len = 0
+		goto found
+		
+		idx = integer(random(length(dni)))+1
+		
+		if dni[idx] = "*?" then print
+		print dni[idx]
+		goto loop
+		
+
+		data {test:"HOW ARE YOU?", \
+				say: ["I AM FINE."]}
+				
+		data {test:"I AM DONE", \
+				say: ["GOODBYE."] }
+				
+		data {test:"QUIT", \
+				say: ["GOODBYE."] }
+				
+		data {test: "*DREAM", \
+				say:[	"DO YOU THINK DREAMS ARE MEANINGFUL?", \
+					 	"TELL ME ABOUT YOUR DREAMS."]}
+					 
+		data {test:"I LIKE YOUR ", \
+				say: [ 	"THANK YOU.", \
+						"DO YOU WANT MY*?", \
+						"WHY DO YOU LIKE MY* ?"]}
+						
+		data {test:"I AM A ", \
+				say: [	"WHY ARE YOU A*?", \
+						"IS IT IMPORTANT TO YOU TO BE A *?"]}
+						
+		data {test:"I HATE ", \
+				say: [	"THAT IS A STRONG EMOTION.", \
+						"WHY DO YOU HATE *?"]}
+						
+		data {test: "I DO NOT ", \
+				say:[	"WHY DON'T YOU *?", \
+						"SHOULD ANYONE *?"]}
+						
+		data {test:"I AM", \
+				say:[	"WHY ARE YOU*?", \
+						"REALLY? YOU ARE*?", \
+						"DO YOU LIKE THAT YOU ARE*?"]}
+						
+		data {test:"YOU ARE", \
+				say:[	"WHY DO YOU THINK I AM*?", \
+						"THIS IS NOT ABOUT ME"]}
+						
+		data {test:"YES", \
+				say:[	"THAT SOUNDS POSITIVE.", \
+						"YOU SEEM SURE OF YOURSELF."]}
+						
+		data {test:"FINE", \
+				say:[	"I AM GLAD."]}
+				
+		data {test:"*ANGRY", \
+				say:[	"HOW DO YOU FEEL ABOUT ANGER?"]}
+				
+		data {test:"*SAD", \
+				say:[	"DO YOU THINK YOU MIGHT BE DEPRESSED?", \
+						"SADNESS IS A NORMAL FEELING."]}
+						
+		data {test: "IT MAKES ME", \
+				say:[	"WHY DOES IT CONTROL YOU THAT WAY?", \
+						"WHY DOES IT MAKE YOU*?"]}
+						
+		data {test: "NO ", \
+				say:[	"DO YOU MEAN THAT TO BE NEGATIVE?", \
+						"WHY NOT?", \
+						"WHY DO YOU SAY NO?"]}
+						
+		data {test: "THANKYOU", \
+				say: [	"YOU'RE WELCOME.", \
+						"NO PROBLEM.", \
+						"THAT IS VERY POLITE"]}
+						
+		data {test: "THANK YOU", \
+				say: [	"YOU ARE WELCOME.", \
+						"NO PROBLEM.", \
+						"THAT IS VERY POLITE"]}
+						
+		data {test: "THANKS", \
+				say: [	"SURE THING.", \
+						"NO PROBLEM.", \
+						"DON'T MENTION IT"]}
+						
+		data {test: "HOW DO I", \
+				say:[	"HOW DO YOU THINK YOU*?", \
+						"DO YOU WANT TO*?", \
+						"SHOULD YOU EVEN*?"]}
+						
+		data {test: "I WASNT", \
+				say:[	"WHY WERENT YOU*?", \
+						"REALLY?  YOU WERENT*?"]}
+						
+		data {test: "*?", \
+				say:[	"WHY DO YOU ASK THAT?", \
+						"ARE YOU CURIOUS ABOUT THAT?", \
+						"IS QUESTIONING THINGS IMPORTANT TO YOU?"]}
+						
+		data {test:"I ", \
+				say:[	"WHAT DOES THAT SAY ABOUT YOU?", \
+						"TELL ME MORE ABOUT YOUR FEELINGS."]}
+						
+		data {test:"*MY NATURE", \
+				say:[	"TELL ME MORE ABOUT YOUR NATURE.", \
+						"DO YOU LIKE THAT YOU ARE THAT WAY?"]}
+		

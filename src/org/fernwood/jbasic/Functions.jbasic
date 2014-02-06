@@ -1,0 +1,219 @@
+// THIS SOURCE FILE IS PART OF JBASIC, AN OPEN SOURCE PUBLICLY AVAILABLE
+// JAVA SOFTWARE PACKAGE HOSTED BY SOURCEFORGE.NET
+// 
+// THIS SOFTWARE IS PROVIDED VIA THE GNU PUBLIC LICENSE AND IS FREELY
+// AVAILABLE FOR ANY PURPOSE COMMERCIAL OR OTHERWISE AS LONG AS THE AUTHORSHIP
+// AND COPYRIGHT INFORMATION IS RETAINED INTACT AND APPROPRIATELY VISIBLE
+// TO THE END USER.
+// 
+// SEE THE PROJECT FILE AT HTTP://WWW.SOURCEFORGE.NET/PROJECTS/JBASIC FOR
+// MORE INFORMATION.
+// 
+// COPYRIGHT 2003-2011 BY TOM COLE, TOMCOLE@USERS.SF.NET
+//
+
+1000           FUNCTION MQUOTE(STRING S)
+1010           // Version: 1.0
+1020           // Date:    Wed Dec 01 10:51:09 EST 2010
+1030           // Author:  cole
+1040           IF LENGTH(SYS$MACRO_QUOTES)<>2 THEN RETURN S
+1044           IF TYPE(SYS$MACRO_QUOTES) <> "ARRAY" THEN RETURN S
+1050           RETURN SYS$MACRO_QUOTES[1] || S || SYS$MACRO_QUOTES[2]
+
+100           FUNCTION FACT( INTEGER X )
+105           // Calculate an integer factorial, recursively
+110           // Version: 1.0
+120           // Date:    Tue Aug 28 16:21:45 EDT 2007
+130           // Author:  cole
+135           INTEGER P = X
+136           IF P > 16 THEN SIGNAL MATH("Invalid argument")
+137           IF P < 1 THEN SIGNAL MATH("Invalid argument")
+140           IF P = 1 THEN RETURN 1
+150           RETURN P * FACT(P - 1 )
+
+function isobject(x) returns boolean
+	if type(x) <> "RECORD" then return false
+	return "_OBJECT$DATA" in(members(x,true))
+
+function uid()
+   return "UID" || encode(integer(random()*100000)) || encode(uniquenumber()) || encode(timecode())
+   
+function encode( integer n )
+// Given an integer value, create a string encoding for it
+// The encoding is unlikely to be the same between any two
+// invocations of encode() for the same integer, and guaranteed
+// to be unique for a given integer value.
+
+    alpha = [ "V", "S", "H", "Q", "G", "0", "T", "5", "A", "J", "M", "P" ]
+    alpha = alpha + [ "B", "9", "U", "R", "7", "3", "W", "X", "C", "F", "6" ]
+    alpha = alpha + [ "Z", "2", "Y", "K", "L", "4", "D", "E", "N", "1", "8" ]
+    	
+	range = length(alpha)
+	v = abs(integer(abs(n)) * 1000 + integer(random( 1000 )))
+	r = ""
+	
+	do
+	   b = mod(v,range)+1
+	   r = alpha[b] + r
+	   if mod(length(r),4) = 0 then r = "_" || r
+	   v = v/range
+	while v > 0
+	
+	do
+	   r = "A" || r
+	   if mod(length(r),4) = 0 then r = "_" || r
+	while length(r) < 8
+	
+	return r
+	
+	
+function card( integer xn, fmt=1 )
+// Given a number n from 1-52, return the name
+// of a playing card that matches it.
+
+    n = floor(xn)
+    if (n < 1) or (n > 52) then return "<Invalid>"
+    
+	card = ( (n-1) % 13 ) + 1
+	suit = floor((n-1)/13) + 1
+	
+	if fmt <> 1 then 
+	  suits = [ "s", "h", "d", "c" ]
+	  cards = [ "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+	  fill = ""	
+	else
+	  suits = [ "Spades", "Hearts", "Diamonds", "Clubs"]
+	  cards = [ "Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King" ]
+	  fill = " of "
+	end if
+
+	return cards[card] + fill + suits[suit]
+	
+function mixedcase ( string str )
+    
+//	MIXEDCASE( string )
+//
+//	Convert string to mixed case, where the first letter (if
+//  alphabetic) is capitalized, and the rest of the string is
+//	lowercase.
+
+
+	return uppercase( left(str,1) ) || lowercase( right(str,length(str)-1) )
+    
+
+function strtoarray ( string str )
+
+//	STRTOARRAY( string )
+//
+//	Returns an array object containing one character element
+//	for each character of the input string; i.e. disassemble
+//	the string into an array of characters.
+
+	a = []
+	n = length(str)
+	for i = 1 to n do a[i] = substring(str, i, i )
+	return array
+
+
+function arraytostr ( array )
+
+//	ARRAYTOSTR( a )
+//
+//	Returns a string which contains the elements of the array
+//	concatenated together.
+
+	s = ""
+	n = length(a)
+	for i = each of a do s = s ||  i
+	
+	return s
+
+
+function pad ( str, integer size )
+
+//	PAD( string, length )
+//
+//	Returns a string padded out with enough blanks to make a string
+//	exactly "length" characters long.  Truncation will occur if needed.
+
+	if size = 0 then return ""	
+	if size > 0 then 
+       return left( str || repeat(" ", size ), size )
+	else
+       size = -size
+       return right( repeat(" ", size ) || str, size )
+	end if
+	end
+	
+FUNCTION PATH(TARGET)
+// Version: 1.1
+// Date:    Dec 2006
+// Author:  cole
+// Return a list of locations where a given file can be found,
+// using the current PATH setting for the host platform.  This
+// is similar to the "which" POSIX shell command.
+
+	LET X = PROPERTY( "java.library.path" ) + ":" + property("user.path")
+	LET PATHLIST =[ ]
+
+PARSE:        
+	LET P = LOCATE( ":", X )
+	IF P = 0 THEN GOTO PARSED
+	LET PS = LEFT( X, P - 1 )
+	LET PATHLIST = PATHLIST + PS
+	LET X = X -( PS + ":" )
+	GOTO PARSE
+
+PARSED:
+	LET C = LENGTH( PATHLIST )
+	LET FS = PROPERTY( "file.separator" )
+	LET RESULT =[ ]
+	FOR I = 1 TO C
+		LET TP = PATHLIST[ I ] || FS || TARGET
+		IF EXISTS( TP ) THEN RESULT = RESULT + TP
+	NEXT I
+	RETURN RESULT
+
+FUNCTION MEAN( ... )
+// Take the numerical average of the arguments
+    d = array($ARGS) // this will "flatten" any arguments
+    t = 0.0
+    for i = 1 to length(d)
+       t = t + double(d[i])
+    next i
+    return t/length(d)
+    
+FUNCTION STD(...)
+// Calculate standard deviation of arguments
+    d = array($ARGS) // this will "flatten" any arguments
+ 	m = mean(d)
+ 	t = 0.0
+ 	for i = 1 to length(d)
+ 	   t = t + ((d[i]-m)^2)
+ 	next i
+ 	t = t / length(d)
+	return sqrt(t)
+
+FUNCTION MID$( STRING S, INTEGER START, INTEGER LENGTH )
+// Version: 1.0
+// Date:    Thu Oct 16 10:53:32 EDT 2008
+// Author:  tom
+RETURN SUBSTRING( S, START, START + LENGTH - 1 )
+
+FUNCTION RECORDMAP( R, N )
+// Version: 1.0
+// Date:    Tue Jun 30 09:08:26 EDT 2009
+// Author:  tom
+LET B = ""
+FOR IX = 1 TO LENGTH( R )
+  LET M = R[ IX ]
+  IF LENGTH( B ) > 0 THEN B = B || ", "
+  LET B = B || M.TYPE
+  IF LOCATE( "SIZE", MEMBERS( M ) ) > 0 THEN B = B || "(" || M.SIZE || ")"
+  LET B = B || " AS " || M.NAME
+NEXT IX
+IF LENGTH( $ARGS ) > 1 THEN B = "FIELD " || N || ", " || B
+RETURN B
+END
+
+

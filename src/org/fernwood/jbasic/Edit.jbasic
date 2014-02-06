@@ -1,0 +1,34 @@
+// THIS SOURCE FILE IS PART OF JBASIC, AN OPEN SOURCE PUBLICLY AVAILABLE
+// JAVA SOFTWARE PACKAGE HOSTED BY SOURCEFORGE.NET
+// 
+// THIS SOFTWARE IS PROVIDED VIA THE GNU PUBLIC LICENSE AND IS FREELY
+// AVAILABLE FOR ANY PURPOSE COMMERCIAL OR OTHERWISE AS LONG AS THE AUTHORSHIP
+// AND COPYRIGHT INFORMATION IS RETAINED INTACT AND APPROPRIATELY VISIBLE
+// TO THE END USER.
+// 
+// SEE THE PROJECT FILE AT HTTP://WWW.SOURCEFORGE.NET/PROJECTS/JBASIC FOR
+// MORE INFORMATION.
+// 
+// COPYRIGHT 2003-2011 BY TOM COLE, TOMCOLE@USERS.SF.NET
+//
+verb edit
+//	Edit the current program using a host-supplied editor
+
+	if length(sys$current_program) > 0 then goto get_pgm
+	print "No current program to edit."
+	return
+	
+get_pgm:
+	p = program(sys$current_program)
+	n = length(p)
+	print "Editing "; p; " with "; n; " lines of code"
+	
+	fn = property("user.home") + property( "file.separator") + "jbasic_" + uniquename() + ".txt"
+	
+	open file fn for output as outf
+	for i = 1 to n do print #outf, p[i]
+	close outf
+	
+	editcmd = "vi " + quote(fn)
+	system editcmd
+	print sys$status

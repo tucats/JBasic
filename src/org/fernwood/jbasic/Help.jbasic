@@ -1,0 +1,183 @@
+// THIS SOURCE FILE IS PART OF JBASIC, AN OPEN SOURCE PUBLICLY AVAILABLE
+// JAVA SOFTWARE PACKAGE HOSTED BY SOURCEFORGE.NET
+// 
+// THIS SOFTWARE IS PROVIDED VIA THE GNU PUBLIC LICENSE AND IS FREELY
+// AVAILABLE FOR ANY PURPOSE COMMERCIAL OR OTHERWISE AS LONG AS THE AUTHORSHIP
+// AND COPYRIGHT INFORMATION IS RETAINED INTACT AND APPROPRIATELY VISIBLE
+// TO THE END USER.
+// 
+// SEE THE PROJECT FILE AT HTTP://WWW.SOURCEFORGE.NET/PROJECTS/JBASIC FOR
+// MORE INFORMATION.
+// 
+// COPYRIGHT 2003-2011 BY TOM COLE, TOMCOLE@USERS.SF.NET
+//
+verb help
+
+//	Implement the HELP command.  Reads the file JBASIC-HELP.TXT which can
+//	be either in the same directory as the JBasic jar, or embedded in the
+//	jar itself.  The file is searched for a key that matches the text that
+//	the user entered on the HELP command line.
+
+    token = ".", match = ".INTRODUCTION", column = 0
+    
+//  This command can't be used in the secure mode because it requires external
+//  file IO, so put out a nice message.
+
+    if !permission("FILE_IO") then print "Sorry, HELP is not available in secured mode." : END
+
+//  Make sure there is a prompt when this command completes.
+
+    SET NEEDPROMPT
+ 
+//	Construct the key.  If the argument list to the verb is empty, then 
+//	it was just HELP with no arguments.  Turn this into INTRODUCTION by
+//	default and look for that key.  Also, handle a few odd cases that
+//  mess up the key search if given as search values.
+
+	if length( $args ) = 0 then goto testfile
+	if $args = ["."] then print "Sorry, no help for ." : return
+	if $args = [".."] then print "Sorry, no help for .." : return
+	
+    
+//	Otherwise we need to concatenate all the arguments (separated
+//  by blanks) and search for a key with that value.
+
+	match = "."	
+    for i = each of $args do match = match || i || " "
+    match = trim(match)
+    
+//  If the key is "CHANGES" then we search for a different marker
+//  token that enumerates the changes notes.
+
+	if left( match, 9 ) = ".CHANGES " then
+	   match = "]" || substr(match, 2), token = "]"
+	else
+	
+//	Similarly, if the key is a function name (has open and 
+//  close parens) then we change the key to begin with a 
+//  colon character, and also change the tag character token 
+//  from "." to ":" so we find only items starting with that 
+//  character.  
+
+       if right( match, 4 ) = " ( )" then
+          match = ":" || right( match, length(match)-1 ), token = ":"
+       end if
+    end if
+    
+//	Find where we read the help text.  We look in two places;
+//	in the local file system's default directory, and in the
+//	jar file itself.  We use the exists() function to see if
+//	the file exists, and try both path syntaxen.
+
+testfile:
+
+	fname = "JBASIC-HELP.TXT", from_file = true	
+	if exists(fname) then goto read_it
+	
+	fname = "@/" || fname, from_file = false
+	if exists(fname) then goto read_it
+	
+	print "Sorry, help is not available."
+	return
+
+//	Open the file, and determine if its one of the two special
+//	case keywords of TOPICS or FUNCTIONS, both of which cause
+//	a scan of the tags in the help file to list general help
+//	topics or help specific to function names.
+	   	
+read_it:
+
+	open file fname for input as hf
+    state = "find"
+    
+    if match = ".TOPICS" then
+	   print
+	   print "Help is available on the following topics:"
+	   print
+       goto topics
+	end if
+	
+    if match = ".CHANGES" then
+	    print
+    	print "Release notes describing changes for each version of JBasic"
+    	print "are available using the HELP CHANGES command.  When requesting"
+    	print "release notes, always specify the full version number, such as"
+    	print 
+    	print "   HELP CHANGES 2.9"
+    	print
+    	print "Release notes prior to JBasic 1.7 are available in the file"
+    	print "CHANGES-ARCHIVE.TXT in the Eclipse project folder.  On-line"
+    	print "release notes are available via HELP for the following versions:"
+    	print
+    	token = "]"
+    	column = 0
+    	goto topics
+    end if
+    
+    if match <> ".FUNCTIONS" then goto loop
+    print
+    print "Help is available for the following functions.  When"
+    print "requesting help on a function, always specify the"
+    print "empty argument list ()."
+    print
+    token = ":"
+    column = 0
+    
+topics:
+	if eof(hf) then goto done
+	line input file hf, text
+
+	if length(text ) < 2 then goto topics
+	key = substring(text,1,1)
+	if key <> token then goto topics
+	if text = ".end of file" then goto done
+	if substring( text,2,2) = token then goto topics
+	if right(text, 4 ) = " ( )" then text = left( text, length(text)-4) || "()"
+	print "  "; pad(substring(text,2 ), 20);
+	column = column + 1
+	if column < 3 then goto topics
+	column = 0
+	print
+	goto topics
+    
+loop:
+	line input file hf, text
+	goto using( state )
+
+find:
+    if text = match then state = "read_item"
+    if not eof(hf) then goto loop
+	print "Sorry, no help for "; substring( match, 2)
+
+read_item:
+	if length(text) < 2 then goto put_item
+	if left(text,2) = ".." then goto fclose
+	if substring(text,1,1) <> token then goto put_item
+	
+    // See if this was help on a user-written function.  Get the
+    // function name from the key string by parse, and see if it
+    // is found in the list of program names (with proper prefix).
+    // If so, put out a footnote in the help.
+    	
+	fkey = uppercase(parse(match,2))
+	isuserfunc = locate(sys$prefix_function || fkey,sys$programs)
+	if isuserfunc then
+        print " "
+        print "  ";fkey; " is a user written function."
+    end if
+    
+fclose:
+    close hf
+    return
+    	
+put_item:
+	print "  "; text
+
+check:
+	if not eof(hf) then goto loop
+	print "Sorry, no help for "; substring( match, 2)
+done:
+	close hf
+	if column > 0 then print
+	
+	return

@@ -1,0 +1,43 @@
+// THIS SOURCE FILE IS PART OF JBASIC, AN OPEN SOURCE PUBLICLY AVAILABLE
+// JAVA SOFTWARE PACKAGE HOSTED BY SOURCEFORGE.NET
+// 
+// THIS SOFTWARE IS PROVIDED VIA THE GNU PUBLIC LICENSE AND IS FREELY
+// AVAILABLE FOR ANY PURPOSE COMMERCIAL OR OTHERWISE AS LONG AS THE AUTHORSHIP
+// AND COPYRIGHT INFORMATION IS RETAINED INTACT AND APPROPRIATELY VISIBLE
+// TO THE END USER.
+// 
+// SEE THE PROJECT FILE AT HTTP://WWW.SOURCEFORGE.NET/PROJECTS/JBASIC FOR
+// MORE INFORMATION.
+// 
+// COPYRIGHT 2003-2011 BY TOM COLE, TOMCOLE@USERS.SF.NET
+//
+verb java
+
+//  Dump the state of the JAVA environment.  If no
+//	argument is given, dumps all properties.  If
+//	an argument is given, dumps only those properites
+//	whose prefix matches what was given.  For example,
+//
+//		JAVA USER
+//
+//	will dump out user.country, user.home, etc.
+
+    proplist = sort(properties())
+    
+    match = ""
+    for i = $args do match = match + lowercase(i)
+    match_len = length(match)    
+   
+    print
+    print "Java Properties:";
+    if match_len > 0 then print " (";match;")";
+    print
+    print
+    
+    for key = each proplist
+        if left(key,match_len) = left(match, match_len) then print pad(key, 24) ; " = "; property(key)
+    next key
+    print
+    set needprompt
+    return
+    

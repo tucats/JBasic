@@ -1,0 +1,71 @@
+  100           VERB DUMP
+  110           // Simple utility to dump the contents of a file.  Used primarily
+  120           // in debugging BINARY format file operations; this may be removed
+  130           // at some point in the future because it is pretty ugly...
+  140           //
+  150           // Version 1.1, Tom Cole
+  160           //
+  170 
+  180           MESSAGE DUMPFNF( EN ) "File \"[]\" does not exist"
+  190           MESSAGE DUMPNOR( EN ) "File \"[]\" cannot opened for reading"
+  200           MESSAGE DUMPDIR( EN ) "\"[]\" is a directory, not a file"
+  210           MESSAGE DUMPUSE( EN ) "Incorrect syntax; use DUMP \"filename\""
+  220           MESSAGE DUMPZED( EN ) "      <File is empty>"
+  230           MESSAGE DUMPPERM(EN)  "You do not have permission to DUMP a file"
+  233 
+  235           IF NOT PERMISSION("FILE_IO") THEN SIGNAL DUMPPERM : RETURN
+  240           // There must be a single argument; the file name
+  250           IF LENGTH( $ARGS ) <> 1 THEN SIGNAL DUMPUSE: RETURN
+  260           LET T = TOKENIZE( $COMMAND_LINE )
+  270           IF T[ 1 ].KIND <> "STRING" THEN SIGNAL DUMPUSE: RETURN
+  280           
+  290           // If the file does not exist, then error.
+  300           LET FN = T[ 1 ].SPELLING
+  310           IF FN = {} THEN SIGNAL DUMPFNF(T[1].SPELLING) : RETURN
+  320           IF ! EXISTS( FN ) THEN SIGNAL DUMPFNF( FN ): RETURN
+  330           
+  340           // The file must be readable, and not a directory
+  350           LET FDATA = FILETYPE( FN )
+  360           IF ! FDATA.READ THEN SIGNAL DUMPNOR( FN ): RETURN
+  370           IF FDATA.DIRECTORY THEN SIGNAL DUMPDIR( FN ): RETURN
+  380           
+  390           
+  400           PRINT "Dump file: "; FN
+  410           
+  420           OPEN BINARY FILE FN AS # 1
+  430           LET POS = 0
+  440           
+  450           LET HBUFF = HEXPAD( POS, 4 ) || ": "
+  460           LET CBUFF = ""
+  470           
+  480           DO WHILE ! EOF( 1 )
+  490             
+  500             GET # 1, INTEGER( 1 ) IBYTE
+  510             LET BYTE = CHARACTER( IBYTE )
+  520             LET HBUFF = HBUFF || HEXPAD( IBYTE, 2 ) || " "
+  530             IF( IBYTE <= 32 ) OR( IBYTE > 126 ) THEN BYTE = "."
+  540             LET CBUFF = CBUFF || BYTE
+  550             
+  560             IF( POS % 16 ) = 15 THEN GOSUB PUTBUFF
+  570             LET POS = POS + 1
+  580           LOOP
+  590           
+  600           IF( POS % 16 > 0 ) THEN HBUFF = HBUFF + ( " " * ( ( 16 - ( POS % 16 ) ) * 3 ) ): GOSUB PUTBUFF
+  610           CLOSE # 1
+  620           RETURN
+  630           
+  640 PUTBUFF:  
+  650           PRINT HBUFF || "   |" || CBUFF || "|"
+  660           LET HBUFF = HEXPAD( POS + 1, 4 ) || ": "
+  670           LET CBUFF = ""
+  680           RETURN
+  690           END
+  
+  100           FUNCTION HEXPAD( I, LEN )
+  110           LET B = HEXADECIMAL( I )
+  120           DO WHILE( LENGTH( B ) < LEN )
+  130             LET B = "0" || B
+  140           LOOP
+  150           RETURN B
+  160           END  
+  
