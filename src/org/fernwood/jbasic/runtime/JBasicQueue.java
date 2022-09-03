@@ -15,7 +15,7 @@
  */
 package org.fernwood.jbasic.runtime;
 
-import sun.misc.Queue;
+import java.util.Queue;
 
 /**
  * This class represents the basic mechanisms of the in-memory file type of 
@@ -40,7 +40,7 @@ public class JBasicQueue {
 	 * The synchronized data structure that manages the actual FIFO
 	 * queue.
 	 */
-	Queue queue;
+	Queue<String> queue;
 
 	/**
 	 * The number of threads (really opens) that have an interest in
@@ -54,7 +54,6 @@ public class JBasicQueue {
 	 */
 	JBasicQueue(final String theName) {
 		name = theName;
-		queue = new Queue();
 		useCount = 0;
 	}
 	
@@ -79,7 +78,7 @@ public class JBasicQueue {
 	 * @param o The string to store in the FIFO queue.
 	 */
 	 void put(String o) {
-		queue.enqueue(o);
+		queue.add(o);
 	}
 	 
 	 /**
@@ -90,11 +89,7 @@ public class JBasicQueue {
 	  */
 
 	String get() {
-		try {
-			return (String) queue.dequeue();
-		} catch (final InterruptedException e) {
-			return null;
-		}
+		return queue.remove();
 	}
 
 	/**

@@ -22,13 +22,13 @@
           description="Compile source *.java files">
     <javac srcdir="src\org\fernwood\jbasic"
            destdir="bin"
-           source="1.5"
+           source="1.7"
            >
     	<compilerarg line="-Xlint:unchecked"/>
     </javac>
     <javac srcdir="src\net\wimpi\telnetd"
            destdir="bin"
-           source="1.5"
+           source="1.7"
            >
     </javac>
   </target>
